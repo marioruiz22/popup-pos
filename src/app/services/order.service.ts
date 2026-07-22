@@ -34,6 +34,10 @@ export class OrderService {
   addProduct(product: Product): void {
     const order = this.getCurrentOrder();
 
+    if (order.status !== 'open') {
+      return;
+    }
+
     const existingItem = order.items.find((item) => item.productId === product.id);
 
     if (existingItem) {
@@ -48,10 +52,47 @@ export class OrderService {
     }
   }
 
+  markPaid(): void {
+    const order = this.getCurrentOrder();
+
+    if (order.status === 'open') {
+      order.status = 'paid';
+    }
+  }
+
+  increaseQuantity(productId: string): void {
+    const item = this.findItem(productId);
+    if (item) {
+      item.quantity++;
+    }
+  }
+
+  decreaseQuantity(productId: string): void {
+    const item = this.findItem(productId);
+    if (!item) {
+      return;
+    }
+
+    if (item.quantity <= 1) {
+      this.removeItem(productId);
+    } else {
+      item.quantity--;
+    }
+  }
+
+  removeItem(productId: string): void {
+    const order = this.getCurrentOrder();
+    order.items = order.items.filter((item) => item.productId !== productId);
+  }
+
   getTotal(order?: Order): number {
     const target = order ?? this.getCurrentOrder();
 
     return target.items.reduce((total, item) => total + item.price * item.quantity, 0);
+  }
+
+  private findItem(productId: string) {
+    return this.getCurrentOrder().items.find((item) => item.productId === productId);
   }
 
   private createNewOrder(): Order {
