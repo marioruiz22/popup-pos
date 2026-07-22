@@ -1,0 +1,42 @@
+.switcher-heading {
+  margin: 0 0 0.75rem;
+}
+
+.switcher-empty {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.switcher-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.switcher-item {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.switcher-item.active {
+  font-weight: 600;
+}
+
+.switcher-primary {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.customer-name {
+  min-height: 1.1rem;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.switcher-meta {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}

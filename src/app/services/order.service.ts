@@ -28,8 +28,20 @@ export class OrderService {
     return this.orders;
   }
 
-  getCurrentOrder(): Order {
-    return this.orders.find((order) => order.id === this.currentOrderId)!;
+  getOpenOrders(): Order[] {
+    return this.orders.filter((order) => order.status === 'open');
+  }
+
+  getCompletedOrders(): Order[] {
+    return this.orders.filter((order) => order.status === 'paid');
+  }
+
+  getCurrentOrder(): Order | null {
+    if (!this.currentOrderId) {
+      return null;
+    }
+
+    return this.orders.find((order) => order.id === this.currentOrderId) ?? null;
   }
 
   createOrder(): Order {
@@ -41,15 +53,17 @@ export class OrderService {
   }
 
   selectOrder(id: string): void {
-    this.currentOrderId = id;
-    this.save();
+    if (this.orders.some((order) => order.id === id)) {
+      this.currentOrderId = id;
+      this.save();
+    }
   }
 
   addProduct(product: Product): void {
-    const order = this.getCurrentOrder();
+    let order = this.getCurrentOrder();
 
-    if (order.status !== 'open') {
-      return;
+    if (!order || order.status !== 'open') {
+      order = this.createOrder();
     }
 
     const existingItem = order.items.find((item) => item.productId === product.id);
@@ -71,10 +85,81 @@ export class OrderService {
   markPaid(): void {
     const order = this.getCurrentOrder();
 
-    if (order.status === 'open') {
+    if (order?.status === 'open') {
       order.status = 'paid';
+      this.selectNextOpenOrder();
       this.save();
     }
+  }
+
+  reopenOrder(id: string): void {
+    const order = this.orders.find((item) => item.id === id);
+
+    if (order?.status === 'paid') {
+      order.status = 'open';
+      this.currentOrderId = id;
+      this.save();
+    }
+  }
+
+  setCustomerName(name: string, orderId?: string): void {
+    const order = orderId
+      ? this.orders.find((item) => item.id === orderId)
+      : this.getCurrentOrder();
+
+    if (!order) {
+      return;
+    }
+
+    const trimmed = name.trim();
+    order.customerName = trimmed || undefined;
+    this.save();
+  }
+
+  deleteOrder(id: string): void {
+    const index = this.orders.findIndex((order) => order.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    this.orders.splice(index, 1);
+
+    if (this.currentOrderId === id) {
+      const nextOpen = this.orders.find((order) => order.status === 'open');
+      this.currentOrderId = nextOpen?.id ?? this.orders[0]?.id ?? '';
+    }
+
+    this.save();
+  }
+
+  getPaidOrdersTotal(): number {
+    return this.getCompletedOrders().reduce(
+      (total, order) => total + this.getTotal(order),
+      0
+    );
+  }
+
+  getItemTypeTotals(): { name: string; quantity: number; total: number }[] {
+    const totals = new Map<string, { name: string; quantity: number; total: number }>();
+
+    for (const order of this.getCompletedOrders()) {
+      for (const item of order.items) {
+        const existing = totals.get(item.productId);
+
+        if (existing) {
+          existing.quantity += item.quantity;
+          existing.total += item.price * item.quantity;
+        } else {
+          totals.set(item.productId, {
+            name: item.name,
+            quantity: item.quantity,
+            total: item.price * item.quantity,
+          });
+        }
+      }
+    }
+
+    return [...totals.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
 
   increaseQuantity(productId: string): void {
@@ -101,18 +186,34 @@ export class OrderService {
 
   removeItem(productId: string): void {
     const order = this.getCurrentOrder();
+    if (!order) {
+      return;
+    }
+
     order.items = order.items.filter((item) => item.productId !== productId);
     this.save();
   }
 
   getTotal(order?: Order): number {
     const target = order ?? this.getCurrentOrder();
+    if (!target) {
+      return 0;
+    }
 
     return target.items.reduce((total, item) => total + item.price * item.quantity, 0);
   }
 
+  getItemCount(order: Order): number {
+    return order.items.reduce((count, item) => count + item.quantity, 0);
+  }
+
+  private selectNextOpenOrder(): void {
+    const nextOpen = this.orders.find((order) => order.status === 'open');
+    this.currentOrderId = nextOpen?.id ?? '';
+  }
+
   private findItem(productId: string) {
-    return this.getCurrentOrder().items.find((item) => item.productId === productId);
+    return this.getCurrentOrder()?.items.find((item) => item.productId === productId);
   }
 
   private createNewOrder(): Order {
@@ -132,18 +233,20 @@ export class OrderService {
       try {
         const data = JSON.parse(raw) as StoredOrders;
 
-        if (Array.isArray(data.orders) && data.orders.length > 0) {
+        if (Array.isArray(data.orders)) {
           this.orders = data.orders.map((order) => ({
             ...order,
             createdAt: new Date(order.createdAt),
           }));
           this.nextOrderNumber = Math.max(
             data.nextOrderNumber ?? 1,
-            ...this.orders.map((order) => order.orderNumber + 1)
+            ...this.orders.map((order) => order.orderNumber + 1),
+            1
           );
-          this.currentOrderId =
-            this.orders.find((order) => order.id === data.currentOrderId)?.id ??
-            this.orders[0].id;
+
+          const savedCurrent = this.orders.find((order) => order.id === data.currentOrderId);
+          this.currentOrderId = savedCurrent?.id ?? '';
+          this.save();
           return;
         }
       } catch {
@@ -151,8 +254,8 @@ export class OrderService {
       }
     }
 
-    this.orders = [this.createNewOrder()];
-    this.currentOrderId = this.orders[0].id;
+    this.orders = [];
+    this.currentOrderId = '';
     this.save();
   }
 

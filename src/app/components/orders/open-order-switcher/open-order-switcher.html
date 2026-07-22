@@ -1,0 +1,30 @@
+@if (showHeading()) {
+  <h2 class="switcher-heading">Open Orders</h2>
+}
+
+@if (openOrders.length === 0) {
+  <p class="switcher-empty">No open orders</p>
+} @else {
+  <div class="switcher-list">
+    @for (order of openOrders; track order.id) {
+      <button
+        type="button"
+        class="switcher-item"
+        [class.active]="order.id === currentOrderId"
+        (click)="selectOrder(order.id)"
+      >
+        <span class="switcher-primary">
+          <span class="order-number">Order #{{ order.orderNumber }}</span>
+          <span class="customer-name">
+            @if (order.customerName) {
+              {{ order.customerName }}
+            }
+          </span>
+        </span>
+        <span class="switcher-meta">
+          {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
+        </span>
+      </button>
+    }
+  </div>
+}

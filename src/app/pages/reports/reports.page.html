@@ -1,0 +1,29 @@
+<div class="reports-page">
+  <h2>Reports</h2>
+
+  <section class="report-section">
+    <h3>Payment Totals</h3>
+    <p class="report-summary">
+      <span>{{ completedOrderCount }} completed orders</span>
+      <strong>${{ paymentTotal.toFixed(2) }} total collected</strong>
+    </p>
+  </section>
+
+  <section class="report-section">
+    <h3>Item Type Totals</h3>
+
+    @if (itemTypeTotals.length === 0) {
+      <p class="section-empty">No completed order items yet</p>
+    } @else {
+      <ul class="item-totals-list">
+        @for (item of itemTypeTotals; track item.name) {
+          <li class="item-total-row">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-quantity">{{ item.quantity }} sold</span>
+            <span class="item-revenue">${{ item.total.toFixed(2) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

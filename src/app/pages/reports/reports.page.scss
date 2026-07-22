@@ -1,0 +1,64 @@
+.reports-page {
+  max-width: 40rem;
+}
+
+.reports-page h2 {
+  margin-top: 0;
+}
+
+.report-section {
+  margin-bottom: 2rem;
+}
+
+.report-section h3 {
+  margin: 0 0 0.75rem;
+}
+
+.report-summary {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.section-empty {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.item-totals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.item-total-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.5rem;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.item-quantity,
+.item-revenue {
+  white-space: nowrap;
+}
+
+.item-revenue {
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .item-total-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

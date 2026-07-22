@@ -1,0 +1,72 @@
+.orders-page {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .orders-page {
+    grid-template-columns: minmax(16rem, 22rem) 1fr;
+    align-items: start;
+  }
+}
+
+.orders-sidebar,
+.orders-detail {
+  display: grid;
+  gap: 1rem;
+}
+
+.orders-section h2 {
+  margin: 0 0 0.75rem;
+}
+
+.section-empty,
+.future-note {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.order-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.order-list-item {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.order-list-item.active {
+  font-weight: 600;
+}
+
+.order-list-primary {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.customer-name {
+  min-height: 1.1rem;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.order-list-meta {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.orders-future {
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.action-button {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}

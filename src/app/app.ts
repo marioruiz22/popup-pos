@@ -1,20 +1,11 @@
-import { Component, signal } from '@angular/core';
-import { ProductGrid } from './components/products/product-grid/product-grid';
-import { ProductManagement } from './components/products/product-management/product-management';
-import { OrderEditor } from './components/orders/order-editor/order-editor';
-import { OrderList } from './components/orders/order-list/order-list';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { AppNav } from './components/layout/app-nav/app-nav';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    ProductGrid,
-    ProductManagement,
-    OrderEditor,
-    OrderList
-  ],
+  imports: [RouterOutlet, AppNav],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
-export class App {
-  protected readonly title = signal('popup-pos');
-}
+export class App {}

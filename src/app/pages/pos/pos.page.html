@@ -1,0 +1,19 @@
+<div class="pos-page">
+  <aside class="pos-sidebar">
+    <app-open-order-switcher />
+
+    @if (hasOpenOrders) {
+      <button type="button" class="action-button" (click)="createOrder()">
+        New Order
+      </button>
+    }
+  </aside>
+
+  <section class="pos-products">
+    <app-product-grid />
+  </section>
+
+  <aside class="pos-order">
+    <app-order-editor [showDeleteButton]="true" />
+  </aside>
+</div>

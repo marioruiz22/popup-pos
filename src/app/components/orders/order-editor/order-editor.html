@@ -1,33 +1,67 @@
-<h2>Current Order</h2>
-
-@if (order.items.length === 0) {
-  <p>No items yet</p>
-} @else {
-  @for (item of order.items; track item.productId) {
-    <div class="order-item">
-      <span class="order-item-info">
-        {{ item.name }}
-        - ${{ (item.price * item.quantity).toFixed(2) }}
-      </span>
-
-      <span class="order-item-controls">
-        <button type="button" (click)="decreaseQuantity(item.productId)" aria-label="Decrease quantity">-</button>
-        <span class="quantity">{{ item.quantity }}</span>
-        <button type="button" (click)="increaseQuantity(item.productId)" aria-label="Increase quantity">+</button>
-        <button type="button" (click)="removeItem(item.productId)" aria-label="Remove item">Remove</button>
-      </span>
-    </div>
-  }
+@if (showHeading()) {
+  <h2>Current Order</h2>
 }
 
-<hr>
+@if (order) {
+  <p class="order-meta">
+    <span>Order #{{ order.orderNumber }}</span>
+    <span>{{ order.status }}</span>
+  </p>
 
-<h3>
-  Total: ${{ getTotal().toFixed(2) }}
-</h3>
+  <label class="customer-field">
+    Customer name
+    <input
+      type="text"
+      [(ngModel)]="customerName"
+      (blur)="saveCustomerName()"
+      [disabled]="!isEditable"
+      placeholder="Optional"
+    />
+  </label>
 
-<p>Status: {{ order.status }}</p>
+  @if (order.items.length === 0) {
+    <p>No items yet</p>
+  } @else {
+    @for (item of order.items; track item.productId) {
+      <div class="order-item">
+        <span class="order-item-info">
+          {{ item.name }}
+          - ${{ (item.price * item.quantity).toFixed(2) }}
+        </span>
 
-@if (order.status === 'open') {
-  <button type="button" (click)="markPaid()">Mark Paid</button>
+        @if (isEditable) {
+          <span class="order-item-controls">
+            <button type="button" (click)="decreaseQuantity(item.productId)" aria-label="Decrease quantity">-</button>
+            <span class="quantity">{{ item.quantity }}</span>
+            <button type="button" (click)="increaseQuantity(item.productId)" aria-label="Increase quantity">+</button>
+            <button type="button" (click)="removeItem(item.productId)" aria-label="Remove item">Remove</button>
+          </span>
+        } @else {
+          <span class="quantity">x{{ item.quantity }}</span>
+        }
+      </div>
+    }
+  }
+
+  <hr>
+
+  <h3>
+    Total: ${{ getTotal().toFixed(2) }}
+  </h3>
+
+  <div class="order-actions">
+    @if (showCompleteButton() && isEditable) {
+      <button type="button" class="action-button action-primary" (click)="completeOrder()">
+        {{ completeButtonLabel() }}
+      </button>
+    }
+
+    @if (showDeleteButton() && (isEditable || deleteAnyStatus())) {
+      <button type="button" class="action-button action-danger" (click)="deleteOrder()">
+        Delete Order
+      </button>
+    }
+  </div>
+} @else {
+  <p class="order-empty">No open order. Tap a product to start a new order.</p>
 }

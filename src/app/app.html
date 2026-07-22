@@ -1,15 +1,12 @@
-<h1>Popup POS</h1>
+<div class="app-shell">
+  <header class="app-header">
+    <h1 class="app-title">Popup POS</h1>
+    <app-nav class="nav-desktop"></app-nav>
+  </header>
 
-<div class="layout">
+  <main class="app-main">
+    <router-outlet />
+  </main>
 
-  <div>
-    <app-product-grid></app-product-grid>
-    <app-product-management></app-product-management>
-  </div>
-
-  <div>
-    <app-order-list></app-order-list>
-    <app-order-editor></app-order-editor>
-  </div>
-
+  <app-nav class="nav-mobile"></app-nav>
 </div>

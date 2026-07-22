@@ -1,0 +1,87 @@
+<div class="orders-page">
+  <aside class="orders-sidebar">
+    <section class="orders-section">
+      <h2>Open Orders</h2>
+
+      @if (openOrders.length === 0) {
+        <p class="section-empty">No open orders</p>
+      } @else {
+        <div class="order-list">
+          @for (order of openOrders; track order.id) {
+            <button
+              type="button"
+              class="order-list-item"
+              [class.active]="order.id === selectedOrder?.id"
+              (click)="selectOrder(order.id)"
+            >
+              <span class="order-list-primary">
+                <span>Order #{{ order.orderNumber }}</span>
+                <span class="customer-name">
+                  @if (order.customerName) {
+                    {{ order.customerName }}
+                  }
+                </span>
+              </span>
+              <span class="order-list-meta">
+                {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="orders-section">
+      <h2>Completed Orders</h2>
+
+      @if (completedOrders.length === 0) {
+        <p class="section-empty">No completed orders</p>
+      } @else {
+        <div class="order-list">
+          @for (order of completedOrders; track order.id) {
+            <button
+              type="button"
+              class="order-list-item"
+              [class.active]="order.id === selectedOrder?.id"
+              (click)="selectOrder(order.id)"
+            >
+              <span class="order-list-primary">
+                <span>Order #{{ order.orderNumber }}</span>
+                <span class="customer-name">
+                  @if (order.customerName) {
+                    {{ order.customerName }}
+                  }
+                </span>
+              </span>
+              <span class="order-list-meta">
+                {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="orders-future" aria-label="Future order tools">
+      <p class="future-note">Search, filter, and cancel tools can be added here.</p>
+    </section>
+  </aside>
+
+  <section class="orders-detail">
+    @if (selectedOrder) {
+      <app-order-editor
+        [showCompleteButton]="false"
+        [showDeleteButton]="true"
+        [deleteAnyStatus]="true"
+      />
+
+      @if (selectedOrder.status === 'paid') {
+        <button type="button" class="action-button" (click)="reopenOrder(selectedOrder.id)">
+          Reopen Order
+        </button>
+      }
+    } @else {
+      <p class="section-empty">Select an order to view details, or delete all orders to clear the list.</p>
+    }
+  </section>
+</div>
