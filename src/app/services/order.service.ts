@@ -2,15 +2,27 @@ import { Injectable } from '@angular/core';
 import { Order } from '../models/order';
 import { Product } from '../models/product';
 
+const STORAGE_KEY = 'popup-pos-orders';
+
+interface StoredOrders {
+  orders: Order[];
+  currentOrderId: string;
+  nextOrderNumber: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService {
   private nextOrderNumber = 1;
 
-  private orders: Order[] = [this.createNewOrder()];
+  private orders: Order[] = [];
 
-  private currentOrderId = this.orders[0].id;
+  private currentOrderId = '';
+
+  constructor() {
+    this.load();
+  }
 
   getOrders(): Order[] {
     return this.orders;
@@ -24,11 +36,13 @@ export class OrderService {
     const order = this.createNewOrder();
     this.orders.push(order);
     this.currentOrderId = order.id;
+    this.save();
     return order;
   }
 
   selectOrder(id: string): void {
     this.currentOrderId = id;
+    this.save();
   }
 
   addProduct(product: Product): void {
@@ -50,6 +64,8 @@ export class OrderService {
         quantity: 1,
       });
     }
+
+    this.save();
   }
 
   markPaid(): void {
@@ -57,6 +73,7 @@ export class OrderService {
 
     if (order.status === 'open') {
       order.status = 'paid';
+      this.save();
     }
   }
 
@@ -64,6 +81,7 @@ export class OrderService {
     const item = this.findItem(productId);
     if (item) {
       item.quantity++;
+      this.save();
     }
   }
 
@@ -77,12 +95,14 @@ export class OrderService {
       this.removeItem(productId);
     } else {
       item.quantity--;
+      this.save();
     }
   }
 
   removeItem(productId: string): void {
     const order = this.getCurrentOrder();
     order.items = order.items.filter((item) => item.productId !== productId);
+    this.save();
   }
 
   getTotal(order?: Order): number {
@@ -103,5 +123,46 @@ export class OrderService {
       status: 'open',
       createdAt: new Date(),
     };
+  }
+
+  private load(): void {
+    const raw = localStorage.getItem(STORAGE_KEY);
+
+    if (raw) {
+      try {
+        const data = JSON.parse(raw) as StoredOrders;
+
+        if (Array.isArray(data.orders) && data.orders.length > 0) {
+          this.orders = data.orders.map((order) => ({
+            ...order,
+            createdAt: new Date(order.createdAt),
+          }));
+          this.nextOrderNumber = Math.max(
+            data.nextOrderNumber ?? 1,
+            ...this.orders.map((order) => order.orderNumber + 1)
+          );
+          this.currentOrderId =
+            this.orders.find((order) => order.id === data.currentOrderId)?.id ??
+            this.orders[0].id;
+          return;
+        }
+      } catch {
+        // Fall through to defaults when stored data is invalid.
+      }
+    }
+
+    this.orders = [this.createNewOrder()];
+    this.currentOrderId = this.orders[0].id;
+    this.save();
+  }
+
+  private save(): void {
+    const data: StoredOrders = {
+      orders: this.orders,
+      currentOrderId: this.currentOrderId,
+      nextOrderNumber: this.nextOrderNumber,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 }
