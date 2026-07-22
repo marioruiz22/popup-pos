@@ -4,6 +4,7 @@ export type OrderStatus = 'open' | 'paid' | 'cancelled';
 
 export interface Order {
   id: string;
+  orderNumber: number;
   customerName?: string;
   items: OrderItem[];
   status: OrderStatus;

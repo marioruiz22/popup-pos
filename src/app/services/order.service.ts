@@ -3,13 +3,12 @@ import { Order } from '../models/order';
 import { Product } from '../models/product';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrderService {
+  private nextOrderNumber = 1;
 
-  private orders: Order[] = [
-    this.createNewOrder()
-  ];
+  private orders: Order[] = [this.createNewOrder()];
 
   private currentOrderId = this.orders[0].id;
 
@@ -18,9 +17,7 @@ export class OrderService {
   }
 
   getCurrentOrder(): Order {
-    return this.orders.find(
-      order => order.id === this.currentOrderId
-    )!;
+    return this.orders.find((order) => order.id === this.currentOrderId)!;
   }
 
   createOrder(): Order {
@@ -37,9 +34,7 @@ export class OrderService {
   addProduct(product: Product): void {
     const order = this.getCurrentOrder();
 
-    const existingItem = order.items.find(
-      item => item.productId === product.id
-    );
+    const existingItem = order.items.find((item) => item.productId === product.id);
 
     if (existingItem) {
       existingItem.quantity++;
@@ -48,7 +43,7 @@ export class OrderService {
         productId: product.id,
         name: product.name,
         price: product.price,
-        quantity: 1
+        quantity: 1,
       });
     }
   }
@@ -56,18 +51,16 @@ export class OrderService {
   getTotal(order?: Order): number {
     const target = order ?? this.getCurrentOrder();
 
-    return target.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    return target.items.reduce((total, item) => total + item.price * item.quantity, 0);
   }
 
   private createNewOrder(): Order {
     return {
       id: crypto.randomUUID(),
+      orderNumber: this.nextOrderNumber++,
       items: [],
       status: 'open',
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 }
