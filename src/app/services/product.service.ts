@@ -30,6 +30,13 @@ const DEFAULT_PRODUCTS: Product[] = [
   },
 ];
 
+export interface ProductInput {
+  name: string;
+  price: number;
+  imageUrl?: string;
+  active: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -42,6 +49,64 @@ export class ProductService {
 
   getProducts(): Product[] {
     return this.products.filter((product) => product.active);
+  }
+
+  getAllProducts(): Product[] {
+    return this.products;
+  }
+
+  addProduct(input: ProductInput): Product | null {
+    const product = this.toProduct(crypto.randomUUID(), input);
+    if (!product) {
+      return null;
+    }
+
+    this.products.push(product);
+    this.save();
+    return product;
+  }
+
+  updateProduct(id: string, input: ProductInput): Product | null {
+    const index = this.products.findIndex((product) => product.id === id);
+    if (index === -1) {
+      return null;
+    }
+
+    const product = this.toProduct(id, input);
+    if (!product) {
+      return null;
+    }
+
+    this.products[index] = product;
+    this.save();
+    return product;
+  }
+
+  setProductActive(id: string, active: boolean): void {
+    const product = this.products.find((item) => item.id === id);
+    if (!product) {
+      return;
+    }
+
+    product.active = active;
+    this.save();
+  }
+
+  private toProduct(id: string, input: ProductInput): Product | null {
+    const name = input.name.trim();
+    if (!name || Number.isNaN(input.price) || input.price < 0) {
+      return null;
+    }
+
+    const imageUrl = input.imageUrl?.trim();
+
+    return {
+      id,
+      name,
+      price: input.price,
+      imageUrl: imageUrl || undefined,
+      active: input.active,
+    };
   }
 
   private load(): void {

@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ProductGrid } from './components/products/product-grid/product-grid';
+import { ProductManagement } from './components/products/product-management/product-management';
 import { OrderEditor } from './components/orders/order-editor/order-editor';
 import { OrderList } from './components/orders/order-list/order-list';
 
@@ -7,6 +8,7 @@ import { OrderList } from './components/orders/order-list/order-list';
   selector: 'app-root',
   imports: [
     ProductGrid,
+    ProductManagement,
     OrderEditor,
     OrderList
   ],

@@ -1,0 +1,59 @@
+.product-form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+
+.product-form label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.product-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.product-list li.inactive {
+  opacity: 0.6;
+}
+
+.product-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.image-url {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  word-break: break-all;
+}
+
+.product-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}

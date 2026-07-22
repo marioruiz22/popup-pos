@@ -11,13 +11,13 @@ import { OrderService } from '../../../services/order.service';
 })
 export class ProductGrid {
 
-  products: Product[];
-
   constructor(
     private productService: ProductService,
     private orderService: OrderService
-  ) {
-    this.products = this.productService.getProducts();
+  ) {}
+
+  get products(): Product[] {
+    return this.productService.getProducts();
   }
 
   addProduct(product: Product) {
