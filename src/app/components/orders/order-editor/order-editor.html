@@ -1,0 +1,18 @@
+<h2>Current Order</h2>
+
+@if (order.items.length === 0) {
+  <p>No items yet</p>
+} @else {
+  @for (item of order.items; track item.productId) {
+    <div>
+      {{ item.name }} x{{ item.quantity }}
+      - ${{ (item.price * item.quantity).toFixed(2) }}
+    </div>
+  }
+}
+
+<hr>
+
+<h3>
+  Total: ${{ getTotal().toFixed(2) }}
+</h3>

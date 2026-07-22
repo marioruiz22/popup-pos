@@ -7,26 +7,36 @@ import { Product } from '../models/product';
 })
 export class OrderService {
 
-  private orders: Order[] = [];
+  private orders: Order[] = [
+    this.createNewOrder()
+  ];
+
+  private currentOrderId = this.orders[0].id;
 
   getOrders(): Order[] {
     return this.orders;
   }
 
+  getCurrentOrder(): Order {
+    return this.orders.find(
+      order => order.id === this.currentOrderId
+    )!;
+  }
+
   createOrder(): Order {
-    const order: Order = {
-      id: crypto.randomUUID(),
-      items: [],
-      status: 'open',
-      createdAt: new Date()
-    };
-
+    const order = this.createNewOrder();
     this.orders.push(order);
-
+    this.currentOrderId = order.id;
     return order;
   }
 
-  addProduct(order: Order, product: Product): void {
+  selectOrder(id: string): void {
+    this.currentOrderId = id;
+  }
+
+  addProduct(product: Product): void {
+    const order = this.getCurrentOrder();
+
     const existingItem = order.items.find(
       item => item.productId === product.id
     );
@@ -43,11 +53,21 @@ export class OrderService {
     }
   }
 
-  getTotal(order: Order): number {
-    return order.items.reduce(
-      (total, item) =>
-        total + item.price * item.quantity,
+  getTotal(order?: Order): number {
+    const target = order ?? this.getCurrentOrder();
+
+    return target.items.reduce(
+      (total, item) => total + item.price * item.quantity,
       0
     );
+  }
+
+  private createNewOrder(): Order {
+    return {
+      id: crypto.randomUUID(),
+      items: [],
+      status: 'open',
+      createdAt: new Date()
+    };
   }
 }

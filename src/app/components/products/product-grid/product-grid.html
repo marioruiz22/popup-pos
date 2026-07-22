@@ -1,0 +1,8 @@
+<div class="product-grid">
+  @for (product of products; track product.id) {
+    <button class="product-button" (click)="addProduct(product)">
+      <div>{{ product.name }}</div>
+      <div>${{ product.price.toFixed(2) }}</div>
+    </button>
+  }
+</div>
