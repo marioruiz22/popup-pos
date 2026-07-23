@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+.bubbles-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(2.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 9;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.bubbles-scroll {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: stretch;
+  gap: 0.5rem;
+  overflow-x: auto;
+  min-width: 0;
+  padding-bottom: 0.15rem;
+  scrollbar-width: thin;
+}
+
+.order-bubble {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 0.1rem;
+  align-content: center;
+  min-width: 4.75rem;
+  max-width: 6.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+}
+
+.order-bubble.active {
+  border-color: #1a56db;
+  background: #1a56db;
+  color: #fff;
+}
+
+.new-order-bubble {
+  min-width: 3.25rem;
+  max-width: 3.25rem;
+  padding: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubble-number {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.bubble-total {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.bubble-meta {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.bubble-name {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-height: 0.85rem;
+}
+
+@media (min-width: 900px) {
+  :host {
+    display: none;
+  }
+}

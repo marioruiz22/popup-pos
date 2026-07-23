@@ -1,4 +1,4 @@
-import { Component, DoCheck, input } from '@angular/core';
+import { Component, DoCheck, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
@@ -8,13 +8,20 @@ import { OrderService } from '../../../services/order.service';
   imports: [FormsModule],
   templateUrl: './order-editor.html',
   styleUrl: './order-editor.scss',
+  host: {
+    '[class.touch-friendly]': 'touchFriendly()',
+  },
 })
 export class OrderEditor implements DoCheck {
   showHeading = input(true);
   showCompleteButton = input(true);
   showDeleteButton = input(false);
   deleteAnyStatus = input(false);
+  touchFriendly = input(false);
   completeButtonLabel = input('Complete Order');
+
+  orderCompleted = output<void>();
+  orderDeleted = output<void>();
 
   customerName = '';
 
@@ -63,6 +70,7 @@ export class OrderEditor implements DoCheck {
 
   completeOrder(): void {
     this.orderService.markPaid();
+    this.orderCompleted.emit();
   }
 
   deleteOrder(): void {
@@ -74,6 +82,7 @@ export class OrderEditor implements DoCheck {
     this.orderService.deleteOrder(order.id);
     this.trackedOrderId = '';
     this.customerName = '';
+    this.orderDeleted.emit();
   }
 
   getTotal(): number {

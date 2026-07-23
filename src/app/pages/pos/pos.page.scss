@@ -3,21 +3,34 @@
   gap: 1rem;
 }
 
+.pos-desktop-only {
+  display: none;
+}
+
 @media (min-width: 900px) {
   .pos-page {
     grid-template-columns: minmax(12rem, 16rem) 1fr minmax(16rem, 20rem);
     align-items: start;
   }
+
+  .pos-desktop-only {
+    display: grid;
+    gap: 0.75rem;
+  }
 }
 
-.pos-sidebar,
-.pos-order {
-  display: grid;
-  gap: 0.75rem;
+.pos-products {
+  min-width: 0;
 }
 
 .action-button {
   min-height: 2.75rem;
   padding: 0.75rem 1rem;
   cursor: pointer;
+}
+
+@media (max-width: 899px) {
+  .pos-page {
+    padding-bottom: 4.5rem;
+  }
 }

@@ -1,0 +1,24 @@
+<div class="cart-backdrop" (click)="close()">
+  <section
+    class="cart-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Order cart"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="cart-header">
+      <h2 class="cart-title">Order Cart</h2>
+      <button type="button" class="cart-close" (click)="close()" aria-label="Close cart">×</button>
+    </header>
+
+    <div class="cart-body">
+      <app-order-editor
+        [showHeading]="false"
+        [showDeleteButton]="true"
+        [touchFriendly]="true"
+        (orderCompleted)="onOrderCompleted()"
+        (orderDeleted)="onOrderDeleted()"
+      />
+    </div>
+  </section>
+</div>

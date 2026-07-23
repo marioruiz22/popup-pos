@@ -62,3 +62,9 @@
 .action-danger {
   color: #b00020;
 }
+
+:host(.touch-friendly) .action-button,
+:host(.touch-friendly) .order-item-controls button {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}

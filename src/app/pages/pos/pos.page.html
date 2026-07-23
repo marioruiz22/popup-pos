@@ -1,5 +1,5 @@
 <div class="pos-page">
-  <aside class="pos-sidebar">
+  <aside class="pos-sidebar pos-desktop-only">
     <app-open-order-switcher />
 
     @if (hasOpenOrders) {
@@ -13,7 +13,13 @@
     <app-product-grid />
   </section>
 
-  <aside class="pos-order">
+  <aside class="pos-order pos-desktop-only">
     <app-order-editor [showDeleteButton]="true" />
   </aside>
+
+  <app-open-order-bubbles (openCart)="openCart()" />
+
+  @if (cartOpen) {
+    <app-order-cart-panel (closed)="closeCart()" />
+  }
 </div>

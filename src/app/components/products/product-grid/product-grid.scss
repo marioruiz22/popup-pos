@@ -1,11 +1,39 @@
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
 .product-button {
-  padding: 20px;
-  font-size: 18px;
+  min-height: 4.5rem;
+  padding: 1rem;
+  font-size: 1rem;
   cursor: pointer;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+}
+
+@media (min-width: 600px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.85rem;
+  }
+
+  .product-button {
+    min-height: 5rem;
+    font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .product-grid {
+    gap: 0.75rem;
+  }
+
+  .product-button {
+    min-height: 5.5rem;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+  }
 }
