@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ProductService } from '../../../services/product.service';
 import { Product } from '../../../models/product';
 import { OrderService } from '../../../services/order.service';
+import { nameInitial } from '../../../utils/image.util';
 
 @Component({
   selector: 'app-product-grid',
@@ -10,6 +11,7 @@ import { OrderService } from '../../../services/order.service';
   styleUrl: './product-grid.scss'
 })
 export class ProductGrid {
+  readonly nameInitial = nameInitial;
 
   constructor(
     private productService: ProductService,

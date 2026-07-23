@@ -26,7 +26,14 @@
 }
 
 .product-image.placeholder {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8edf5;
+  color: #1a56db;
+  font-size: clamp(1.75rem, 8vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .product-name {

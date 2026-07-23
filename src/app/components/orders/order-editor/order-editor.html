@@ -45,8 +45,8 @@
           <div class="order-item">
             @if (getItemImage(item); as imageUrl) {
               <img [src]="imageUrl" [alt]="item.name" class="item-thumb" />
-            } @else {
-              <div class="item-thumb placeholder" aria-hidden="true"></div>
+            }             @else {
+              <div class="item-thumb placeholder" aria-hidden="true">{{ nameInitial(item.name) }}</div>
             }
 
             <div class="order-item-main">

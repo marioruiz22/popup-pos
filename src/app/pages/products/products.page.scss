@@ -1,3 +1,149 @@
 .products-page {
-  max-width: 48rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 44rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.page-subtitle {
+  margin: 0.25rem 0 0;
+  opacity: 0.75;
+}
+
+.add-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 1.1rem;
+  background: #1a56db;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.add-button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.products-card {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 1.1rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.products-card-header {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+.products-list {
+  display: grid;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.product-row:first-child {
+  border-top: none;
+}
+
+.product-row.inactive {
+  opacity: 0.7;
+}
+
+.product-thumb {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: cover;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.product-thumb.placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8edf5;
+  color: #1a56db;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.product-copy {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+  min-width: 0;
+}
+
+.product-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-pill.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.inactive-pill {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.product-price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.section-empty {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.section-empty.padded {
+  padding: 1rem;
 }

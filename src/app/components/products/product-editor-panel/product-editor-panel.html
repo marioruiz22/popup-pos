@@ -1,0 +1,92 @@
+<div class="editor-backdrop">
+  <section class="editor-panel" role="dialog" aria-modal="true" [attr.aria-label]="title">
+    <header class="editor-header">
+      <button type="button" class="editor-close" (click)="close()" aria-label="Close">×</button>
+      <h2 class="editor-title">{{ title }}</h2>
+      <span class="editor-spacer" aria-hidden="true"></span>
+    </header>
+
+    <div class="editor-body">
+      <form class="product-form" (ngSubmit)="submit()">
+        <section class="form-card">
+          <label class="field">
+            Name
+            <input name="name" [(ngModel)]="form.name" required placeholder="Product name" />
+          </label>
+
+          <label class="field">
+            Price
+            <div class="money-input">
+              <span class="money-prefix">$</span>
+              <input
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                [(ngModel)]="form.price"
+                required
+                placeholder="0.00"
+              />
+            </div>
+          </label>
+        </section>
+
+        <section class="form-card image-card">
+          <span class="field-label">Product image</span>
+
+          <div class="image-row">
+            @if (hasImage) {
+              <img [src]="form.imageUrl" alt="Product preview" class="image-preview" />
+              <div class="image-actions">
+                <button type="button" class="clear-image" (click)="clearImage()">Remove</button>
+                <label class="file-picker">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onImageSelected($event)"
+                    [disabled]="imageProcessing"
+                  />
+                  <span>{{ imageProcessing ? 'Processing…' : 'Replace' }}</span>
+                </label>
+              </div>
+            } @else {
+              <div class="image-preview placeholder" aria-hidden="true">{{ imageInitial }}</div>
+              <div class="image-actions">
+                <label class="file-picker">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onImageSelected($event)"
+                    [disabled]="imageProcessing"
+                  />
+                  <span>{{ imageProcessing ? 'Processing…' : 'Add image' }}</span>
+                </label>
+              </div>
+            }
+          </div>
+
+          @if (imageError) {
+            <p class="image-error">{{ imageError }}</p>
+          }
+        </section>
+
+        <section class="form-card toggle-card">
+          <div class="toggle-copy">
+            <strong>Active</strong>
+            <span>Show this product on the POS</span>
+          </div>
+          <label class="toggle">
+            <input name="active" type="checkbox" [(ngModel)]="form.active" />
+            <span class="toggle-track" aria-hidden="true">
+              <span class="toggle-thumb"></span>
+            </span>
+          </label>
+        </section>
+
+        <button type="submit" class="save-button" [disabled]="imageProcessing">
+          {{ isEditing ? 'Save Changes' : 'Add Product' }}
+        </button>
+      </form>
+    </div>
+  </section>
+</div>

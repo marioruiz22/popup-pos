@@ -1,3 +1,59 @@
 <div class="products-page">
-  <app-product-management />
+  <header class="page-header">
+    <div>
+      <h2>Products</h2>
+      <p class="page-subtitle">Manage items available on the POS</p>
+    </div>
+    <button type="button" class="add-button" (click)="openNewProduct()" aria-label="Add product">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+  </header>
+
+  <section class="products-card" aria-label="Products">
+    <header class="products-card-header">
+      {{ products.length }} {{ products.length === 1 ? 'product' : 'products' }}
+    </header>
+
+    @if (products.length === 0) {
+      <p class="section-empty padded">No products yet. Tap + to create one.</p>
+    } @else {
+      <div class="products-list">
+        @for (product of products; track product.id) {
+          <button
+            type="button"
+            class="product-row"
+            [class.inactive]="!product.active"
+            (click)="openProduct(product)"
+          >
+            @if (product.imageUrl) {
+              <img [src]="product.imageUrl" [alt]="product.name" class="product-thumb" />
+            } @else {
+              <div class="product-thumb placeholder" aria-hidden="true">
+                {{ productInitial(product.name) }}
+              </div>
+            }
+
+            <div class="product-copy">
+              <span class="product-name">{{ product.name }}</span>
+              <span class="status-pill" [class.active]="product.active" [class.inactive-pill]="!product.active">
+                {{ product.active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+
+            <span class="product-price">${{ product.price.toFixed(2) }}</span>
+          </button>
+        }
+      </div>
+    }
+  </section>
 </div>
+
+@if (editorOpen) {
+  <app-product-editor-panel
+    [productId]="editingProductId"
+    (closed)="closeEditor()"
+    (saved)="closeEditor()"
+  />
+}

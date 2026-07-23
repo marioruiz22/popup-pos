@@ -87,3 +87,7 @@ function fitWithin(width: number, height: number, maxSize: number): { width: num
     height: Math.max(1, Math.round(height * scale)),
   };
 }
+
+export function nameInitial(name: string | null | undefined): string {
+  return name?.trim().charAt(0).toUpperCase() || '?';
+}

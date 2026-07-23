@@ -4,6 +4,7 @@ import { Order, PaymentMethod } from '../../../models/order';
 import { OrderItem } from '../../../models/order-item';
 import { OrderService } from '../../../services/order.service';
 import { ProductService } from '../../../services/product.service';
+import { nameInitial } from '../../../utils/image.util';
 
 @Component({
   selector: 'app-order-editor',
@@ -15,6 +16,8 @@ import { ProductService } from '../../../services/product.service';
   },
 })
 export class OrderEditor implements DoCheck {
+  readonly nameInitial = nameInitial;
+
   showHeading = input(true);
   showCompleteButton = input(true);
   showDeleteButton = input(false);
