@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../../models/product';
 import { ProductInput, ProductService } from '../../../services/product.service';
+import { fileToProductImageDataUrl } from '../../../utils/image.util';
 
 @Component({
   selector: 'app-product-management',
@@ -11,10 +12,15 @@ import { ProductInput, ProductService } from '../../../services/product.service'
 })
 export class ProductManagement {
   editingId: string | null = null;
+  imageError = '';
+  imageProcessing = false;
 
   form: ProductInput = this.createEmptyForm();
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   get products(): Product[] {
     return this.productService.getAllProducts();
@@ -22,6 +28,10 @@ export class ProductManagement {
 
   get isEditing(): boolean {
     return this.editingId !== null;
+  }
+
+  get hasImage(): boolean {
+    return Boolean(this.form.imageUrl?.trim());
   }
 
   submit(): void {
@@ -41,6 +51,7 @@ export class ProductManagement {
 
   editProduct(product: Product): void {
     this.editingId = product.id;
+    this.imageError = '';
     this.form = {
       name: product.name,
       price: product.price,
@@ -61,8 +72,44 @@ export class ProductManagement {
     }
   }
 
+  async onImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    this.imageError = '';
+    this.imageProcessing = true;
+    this.changeDetector.detectChanges();
+
+    try {
+      this.form = {
+        ...this.form,
+        imageUrl: await fileToProductImageDataUrl(file),
+      };
+    } catch {
+      this.imageError = 'Could not use that image. Try another photo.';
+    } finally {
+      this.imageProcessing = false;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  clearImage(): void {
+    this.form = {
+      ...this.form,
+      imageUrl: '',
+    };
+    this.imageError = '';
+  }
+
   private resetForm(): void {
     this.editingId = null;
+    this.imageError = '';
+    this.imageProcessing = false;
     this.form = this.createEmptyForm();
   }
 

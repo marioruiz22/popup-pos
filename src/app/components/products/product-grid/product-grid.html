@@ -1,8 +1,13 @@
 <div class="product-grid">
   @for (product of products; track product.id) {
     <button class="product-button" (click)="addProduct(product)">
-      <div>{{ product.name }}</div>
-      <div>${{ product.price.toFixed(2) }}</div>
+      @if (product.imageUrl) {
+        <img [src]="product.imageUrl" [alt]="product.name" class="product-image" />
+      } @else {
+        <div class="product-image placeholder" aria-hidden="true"></div>
+      }
+      <div class="product-name">{{ product.name }}</div>
+      <div class="product-price">${{ product.price.toFixed(2) }}</div>
     </button>
   }
 </div>

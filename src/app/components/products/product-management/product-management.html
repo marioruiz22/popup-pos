@@ -11,10 +11,30 @@
     <input name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" required />
   </label>
 
-  <label>
-    Image URL
-    <input name="imageUrl" [(ngModel)]="form.imageUrl" />
-  </label>
+  <div class="image-field">
+    <span class="image-field-label">Product image</span>
+
+    @if (hasImage) {
+      <div class="image-preview-wrap">
+        <img [src]="form.imageUrl" alt="Product preview" class="image-preview" />
+        <button type="button" class="clear-image" (click)="clearImage()">Remove image</button>
+      </div>
+    }
+
+    <label class="file-picker">
+      <input
+        type="file"
+        accept="image/*"
+        (change)="onImageSelected($event)"
+        [disabled]="imageProcessing"
+      />
+      <span>{{ imageProcessing ? 'Processing…' : hasImage ? 'Replace image' : 'Choose from device' }}</span>
+    </label>
+
+    @if (imageError) {
+      <p class="image-error">{{ imageError }}</p>
+    }
+  </div>
 
   <label class="checkbox-label">
     <input name="active" type="checkbox" [(ngModel)]="form.active" />
@@ -22,7 +42,9 @@
   </label>
 
   <div class="form-actions">
-    <button type="submit">{{ isEditing ? 'Update Product' : 'Add Product' }}</button>
+    <button type="submit" [disabled]="imageProcessing">
+      {{ isEditing ? 'Update Product' : 'Add Product' }}
+    </button>
     @if (isEditing) {
       <button type="button" (click)="cancelEdit()">Cancel</button>
     }
@@ -38,12 +60,17 @@
     @for (product of products; track product.id) {
       <li [class.inactive]="!product.active">
         <div class="product-summary">
-          <strong>{{ product.name }}</strong>
-          <span>${{ product.price.toFixed(2) }}</span>
-          <span>{{ product.active ? 'Active' : 'Inactive' }}</span>
           @if (product.imageUrl) {
-            <span class="image-url">{{ product.imageUrl }}</span>
+            <img [src]="product.imageUrl" [alt]="product.name" class="product-thumb" />
+          } @else {
+            <div class="product-thumb placeholder" aria-hidden="true"></div>
           }
+
+          <div class="product-copy">
+            <strong>{{ product.name }}</strong>
+            <span>${{ product.price.toFixed(2) }}</span>
+            <span>{{ product.active ? 'Active' : 'Inactive' }}</span>
+          </div>
         </div>
 
         <div class="product-actions">
