@@ -1,23 +1,31 @@
-<div class="cart-backdrop" (click)="close()">
+<div class="cart-backdrop">
   <section
     class="cart-panel"
     role="dialog"
     aria-modal="true"
-    aria-label="Order cart"
-    (click)="$event.stopPropagation()"
+    aria-label="Checkout"
   >
     <header class="cart-header">
-      <h2 class="cart-title">Order Cart</h2>
-      <button type="button" class="cart-close" (click)="close()" aria-label="Close cart">×</button>
+      <button type="button" class="cart-close" (click)="close()" aria-label="Close checkout">×</button>
+
+      <h2 class="cart-title">Checkout</h2>
+
+      <button type="button" class="cart-delete" (click)="deleteOrder()" aria-label="Delete order">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M9 3h6a1 1 0 0 1 1 1v1h4v2h-1v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4V5h4V4a1 1 0 0 1 1-1zm1 2v0h4V5h-4zm-2 4v10h2V9H8zm4 0v10h2V9h-2zm4 0v10h2V9h-2z"
+          />
+        </svg>
+      </button>
     </header>
 
     <div class="cart-body">
       <app-order-editor
         [showHeading]="false"
-        [showDeleteButton]="true"
+        [showDeleteButton]="false"
         [touchFriendly]="true"
         (orderCompleted)="onOrderCompleted()"
-        (orderDeleted)="onOrderDeleted()"
       />
     </div>
   </section>

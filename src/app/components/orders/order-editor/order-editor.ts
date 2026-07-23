@@ -133,6 +133,11 @@ export class OrderEditor implements DoCheck {
       return;
     }
 
+    const confirmed = confirm(`Delete order #${order.orderNumber}? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
     this.orderService.deleteOrder(order.id);
     this.trackedOrderId = '';
     this.customerName = '';

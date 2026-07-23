@@ -15,3 +15,9 @@ button,
 input {
   font: inherit;
 }
+
+body.checkout-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+

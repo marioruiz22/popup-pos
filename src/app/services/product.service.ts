@@ -48,11 +48,11 @@ export class ProductService {
   }
 
   getProducts(): Product[] {
-    return this.products.filter((product) => product.active);
+    return this.sortByName(this.products.filter((product) => product.active));
   }
 
   getAllProducts(): Product[] {
-    return this.products;
+    return this.sortByName([...this.products]);
   }
 
   addProduct(input: ProductInput): Product | null {
@@ -107,6 +107,10 @@ export class ProductService {
       imageUrl: imageUrl || undefined,
       active: input.active,
     };
+  }
+
+  private sortByName(products: Product[]): Product[] {
+    return products.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
   }
 
   private load(): void {
