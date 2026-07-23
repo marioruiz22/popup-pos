@@ -15,8 +15,7 @@ interface NavItem {
 export class AppNav {
   readonly navItems: NavItem[] = [
     { path: '/pos', label: 'POS' },
-    { path: '/orders', label: 'Orders' },
+    { path: '/orders', label: 'Sales' },
     { path: '/products', label: 'Products' },
-    { path: '/reports', label: 'Reports' },
   ];
 }

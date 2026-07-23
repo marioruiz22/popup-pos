@@ -116,6 +116,7 @@ export class OrderService {
     }
 
     order.status = 'paid';
+    order.paidAt = new Date();
     this.selectNextOpenOrder();
     this.save();
   }
@@ -128,9 +129,14 @@ export class OrderService {
       order.paymentMethod = undefined;
       order.amountReceived = undefined;
       order.changeDue = undefined;
+      order.paidAt = undefined;
       this.currentOrderId = id;
       this.save();
     }
+  }
+
+  getOrderById(id: string): Order | null {
+    return this.orders.find((order) => order.id === id) ?? null;
   }
 
   setCustomerName(name: string, orderId?: string): void {
@@ -333,6 +339,7 @@ export class OrderService {
           this.orders = data.orders.map((order) => ({
             ...order,
             createdAt: new Date(order.createdAt),
+            paidAt: order.paidAt ? new Date(order.paidAt) : undefined,
           }));
           this.nextOrderNumber = Math.max(
             data.nextOrderNumber ?? 1,

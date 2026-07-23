@@ -1,87 +1,120 @@
 <div class="orders-page">
-  <aside class="orders-sidebar">
-    <section class="orders-section">
-      <h2>Open Orders</h2>
+  <header class="page-header">
+    <h2>Sales</h2>
+    <p class="page-subtitle">Completed sales history and summaries</p>
+  </header>
 
-      @if (openOrders.length === 0) {
-        <p class="section-empty">No open orders</p>
+  <div class="range-filters" role="tablist" aria-label="Date range">
+    @for (option of ranges; track option.id) {
+      <button
+        type="button"
+        class="range-button"
+        role="tab"
+        [class.active]="range === option.id"
+        (click)="setRange(option.id)"
+      >
+        {{ option.label }}
+      </button>
+    }
+  </div>
+
+  <section class="summary-card" aria-label="Sales summary">
+    <div class="summary-grid">
+      <div class="summary-stat">
+        <span class="summary-label">Total sales</span>
+        <strong class="summary-value">${{ totalSales.toFixed(2) }}</strong>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-label">Orders</span>
+        <strong class="summary-value">{{ orderCount }}</strong>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-label">Items sold</span>
+        <strong class="summary-value">{{ itemsSold }}</strong>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-label">Tips</span>
+        <strong class="summary-value">${{ totalTips.toFixed(2) }}</strong>
+      </div>
+    </div>
+
+    <button type="button" class="breakdown-toggle" (click)="toggleItemBreakdown()">
+      {{ showItemBreakdown ? 'Hide item breakdown' : 'More details' }}
+    </button>
+
+    @if (showItemBreakdown) {
+      @if (itemBreakdown.length === 0) {
+        <p class="section-empty">No items sold in this range</p>
       } @else {
-        <div class="order-list">
-          @for (order of openOrders; track order.id) {
-            <button
-              type="button"
-              class="order-list-item"
-              [class.active]="order.id === selectedOrder?.id"
-              (click)="selectOrder(order.id)"
-            >
-              <span class="order-list-primary">
-                <span>Order #{{ order.orderNumber }}</span>
-                <span class="customer-name">
-                  @if (order.customerName) {
-                    {{ order.customerName }}
-                  }
-                </span>
-              </span>
-              <span class="order-list-meta">
-                {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
-              </span>
-            </button>
+        <ul class="breakdown-list">
+          @for (item of itemBreakdown; track item.name) {
+            <li class="breakdown-row">
+              <span class="breakdown-name">{{ item.name }}</span>
+              <span class="breakdown-qty">{{ item.quantity }} sold</span>
+              <span class="breakdown-total">${{ item.total.toFixed(2) }}</span>
+            </li>
           }
-        </div>
+        </ul>
       }
-    </section>
+    }
+  </section>
 
-    <section class="orders-section">
-      <h2>Completed Orders</h2>
+  <section class="orders-card" aria-label="Completed orders">
+    <header class="orders-card-header">
+      {{ orderCount }} {{ orderCount === 1 ? 'order' : 'orders' }}
+    </header>
 
-      @if (completedOrders.length === 0) {
-        <p class="section-empty">No completed orders</p>
-      } @else {
-        <div class="order-list">
-          @for (order of completedOrders; track order.id) {
-            <button
-              type="button"
-              class="order-list-item"
-              [class.active]="order.id === selectedOrder?.id"
-              (click)="selectOrder(order.id)"
-            >
-              <span class="order-list-primary">
-                <span>Order #{{ order.orderNumber }}</span>
-                <span class="customer-name">
-                  @if (order.customerName) {
-                    {{ order.customerName }}
-                  }
-                </span>
-              </span>
-              <span class="order-list-meta">
-                {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
-              </span>
-            </button>
-          }
-        </div>
-      }
-    </section>
-
-    <section class="orders-future" aria-label="Future order tools">
-      <p class="future-note">Search, filter, and cancel tools can be added here.</p>
-    </section>
-  </aside>
-
-  <section class="orders-detail">
-    @if (selectedOrder) {
-      <app-order-editor
-        [showCompleteButton]="false"
-        [showDeleteButton]="true"
-        [deleteAnyStatus]="true"
-      />
-
-      @if (selectedOrder.status === 'paid') {
-        <button type="button" class="action-button" (click)="reopenOrder(selectedOrder.id)">
-          Reopen Order
-        </button>
-      }
+    @if (filteredOrders.length === 0) {
+      <p class="section-empty padded">No completed orders in this range</p>
     } @else {
-      <p class="section-empty">Select an order to view details, or delete all orders to clear the list.</p>
+      <div class="orders-list">
+        @for (order of filteredOrders; track order.id) {
+          <button type="button" class="order-row" (click)="openDetails(order.id)">
+            <span class="order-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                <path
+                  d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.2l-2.1-1.2-2.1 1.2-2.1-1.2-2.1 1.2-2.1-1.2-2.1 1.2V5A1.5 1.5 0 0 1 7 3.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linejoin="round"
+                />
+                <path d="M9.5 8h5M9.5 11.5h5M9.5 15h3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+              </svg>
+            </span>
+
+            <div class="order-cols" [class.has-extras]="hasExtras(order)">
+              <span class="order-number">
+                #{{ order.orderNumber }}
+                @if (order.customerName) {
+                  <span class="order-customer-inline">· {{ order.customerName }}</span>
+                }
+              </span>
+              <span class="order-total">${{ getTotal(order).toFixed(2) }}</span>
+
+              @if (hasExtras(order)) {
+                <span class="order-mid-spacer" aria-hidden="true"></span>
+                <span class="order-total-extras">
+                  @if (getDiscount(order) > 0) {
+                    <span>Discount ${{ getDiscount(order).toFixed(2) }}</span>
+                  }
+                  @if ((order.tip ?? 0) > 0) {
+                    <span>Tip ${{ (order.tip ?? 0).toFixed(2) }}</span>
+                  }
+                </span>
+              }
+
+              <span class="order-meta-line">
+                {{ paymentLabel(order) }} · {{ getItemCount(order) }} items
+              </span>
+              <span class="order-date">{{ formatDate(order) }}</span>
+            </div>
+          </button>
+        }
+      </div>
     }
   </section>
 </div>
+
+@if (detailOrderId) {
+  <app-order-detail-panel [orderId]="detailOrderId" (closed)="closeDetails()" />
+}
