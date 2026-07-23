@@ -2,6 +2,8 @@ import { OrderItem } from './order-item';
 
 export type OrderStatus = 'open' | 'paid' | 'cancelled';
 
+export type PaymentMethod = 'cash' | 'mobile';
+
 export interface Order {
   id: string;
   orderNumber: number;
@@ -9,4 +11,7 @@ export interface Order {
   items: OrderItem[];
   status: OrderStatus;
   createdAt: Date;
+  paymentMethod?: PaymentMethod;
+  amountReceived?: number;
+  changeDue?: number;
 }

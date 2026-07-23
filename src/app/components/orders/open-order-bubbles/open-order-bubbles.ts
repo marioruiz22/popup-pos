@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, output, viewChild } from '@angular/core';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
 
@@ -8,10 +8,33 @@ import { OrderService } from '../../../services/order.service';
   templateUrl: './open-order-bubbles.html',
   styleUrl: './open-order-bubbles.scss',
 })
-export class OpenOrderBubbles {
+export class OpenOrderBubbles implements AfterViewChecked {
   openCart = output<void>();
 
+  private readonly bubblesScroll = viewChild<ElementRef<HTMLElement>>('bubblesScroll');
+  private shouldScrollToEnd = true;
+  private lastOrderCount = 0;
+
   constructor(private orderService: OrderService) {}
+
+  ngAfterViewChecked(): void {
+    const orderCount = this.openOrders.length;
+
+    if (orderCount !== this.lastOrderCount) {
+      this.lastOrderCount = orderCount;
+      this.shouldScrollToEnd = true;
+    }
+
+    if (!this.shouldScrollToEnd) {
+      return;
+    }
+
+    const el = this.bubblesScroll()?.nativeElement;
+    if (el) {
+      el.scrollLeft = el.scrollWidth;
+      this.shouldScrollToEnd = false;
+    }
+  }
 
   get openOrders(): Order[] {
     return this.orderService.getOpenOrders();
@@ -36,6 +59,7 @@ export class OpenOrderBubbles {
 
   createOrder(): void {
     this.orderService.createOrder();
+    this.shouldScrollToEnd = true;
   }
 
   getItemCount(order: Order): number {

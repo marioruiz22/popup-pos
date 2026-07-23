@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Order } from '../models/order';
+import { Order, PaymentMethod } from '../models/order';
 import { Product } from '../models/product';
 
 const STORAGE_KEY = 'popup-pos-orders';
@@ -8,6 +8,11 @@ interface StoredOrders {
   orders: Order[];
   currentOrderId: string;
   nextOrderNumber: number;
+}
+
+export interface PaymentDetails {
+  paymentMethod: PaymentMethod;
+  amountReceived?: number;
 }
 
 @Injectable({
@@ -82,14 +87,33 @@ export class OrderService {
     this.save();
   }
 
-  markPaid(): void {
+  markPaid(details: PaymentDetails): void {
     const order = this.getCurrentOrder();
 
-    if (order?.status === 'open') {
-      order.status = 'paid';
-      this.selectNextOpenOrder();
-      this.save();
+    if (order?.status !== 'open' || order.items.length === 0) {
+      return;
     }
+
+    const total = this.getTotal(order);
+
+    if (details.paymentMethod === 'cash') {
+      const amountReceived = details.amountReceived ?? 0;
+      if (amountReceived < total) {
+        return;
+      }
+
+      order.paymentMethod = 'cash';
+      order.amountReceived = amountReceived;
+      order.changeDue = Number((amountReceived - total).toFixed(2));
+    } else {
+      order.paymentMethod = 'mobile';
+      order.amountReceived = total;
+      order.changeDue = 0;
+    }
+
+    order.status = 'paid';
+    this.selectNextOpenOrder();
+    this.save();
   }
 
   reopenOrder(id: string): void {
@@ -97,6 +121,9 @@ export class OrderService {
 
     if (order?.status === 'paid') {
       order.status = 'open';
+      order.paymentMethod = undefined;
+      order.amountReceived = undefined;
+      order.changeDue = undefined;
       this.currentOrderId = id;
       this.save();
     }
@@ -137,6 +164,26 @@ export class OrderService {
       (total, order) => total + this.getTotal(order),
       0
     );
+  }
+
+  getPaymentMethodTotals(): { method: PaymentMethod | 'unknown'; count: number; total: number }[] {
+    const totals = new Map<PaymentMethod | 'unknown', { count: number; total: number }>();
+
+    for (const order of this.getCompletedOrders()) {
+      const method = order.paymentMethod ?? 'unknown';
+      const existing = totals.get(method) ?? { count: 0, total: 0 };
+      existing.count += 1;
+      existing.total += this.getTotal(order);
+      totals.set(method, existing);
+    }
+
+    return (['cash', 'mobile', 'unknown'] as const)
+      .filter((method) => totals.has(method))
+      .map((method) => ({
+        method,
+        count: totals.get(method)!.count,
+        total: totals.get(method)!.total,
+      }));
   }
 
   getItemTypeTotals(): { name: string; quantity: number; total: number }[] {

@@ -1,27 +1,29 @@
 @if (hasOpenOrders) {
   <div class="bubbles-bar">
-    <div class="bubbles-scroll" aria-label="Open orders">
-      <button type="button" class="order-bubble new-order-bubble" (click)="createOrder()" aria-label="New order">
-        +
-      </button>
+    <div #bubblesScroll class="bubbles-scroll" aria-label="Open orders">
+      <div class="bubbles-track">
+        @for (order of openOrders; track order.id) {
+          <button
+            type="button"
+            class="order-bubble"
+            [class.active]="order.id === currentOrderId"
+            (click)="onOrderClick(order.id)"
+          >
+            <span class="bubble-number">#{{ order.orderNumber }}</span>
+            <span class="bubble-total">${{ getTotal(order).toFixed(2) }}</span>
+            <span class="bubble-meta">{{ getItemCount(order) }} items</span>
+            <span class="bubble-name">
+              @if (order.customerName) {
+                {{ order.customerName }}
+              }
+            </span>
+          </button>
+        }
 
-      @for (order of openOrders; track order.id) {
-        <button
-          type="button"
-          class="order-bubble"
-          [class.active]="order.id === currentOrderId"
-          (click)="onOrderClick(order.id)"
-        >
-          <span class="bubble-number">#{{ order.orderNumber }}</span>
-          <span class="bubble-total">${{ getTotal(order).toFixed(2) }}</span>
-          <span class="bubble-meta">{{ getItemCount(order) }} items</span>
-          <span class="bubble-name">
-            @if (order.customerName) {
-              {{ order.customerName }}
-            }
-          </span>
+        <button type="button" class="order-bubble new-order-bubble" (click)="createOrder()" aria-label="New order">
+          +
         </button>
-      }
+      </div>
     </div>
   </div>
 }

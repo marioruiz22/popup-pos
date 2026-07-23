@@ -17,7 +17,21 @@ export class ReportsPage {
     return this.orderService.getPaidOrdersTotal();
   }
 
+  get paymentMethodTotals() {
+    return this.orderService.getPaymentMethodTotals();
+  }
+
   get itemTypeTotals() {
     return this.orderService.getItemTypeTotals();
+  }
+
+  methodLabel(method: string): string {
+    if (method === 'cash') {
+      return 'Cash';
+    }
+    if (method === 'mobile') {
+      return 'Mobile';
+    }
+    return 'Unspecified';
   }
 }

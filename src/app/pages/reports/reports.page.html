@@ -7,6 +7,18 @@
       <span>{{ completedOrderCount }} completed orders</span>
       <strong>${{ paymentTotal.toFixed(2) }} total collected</strong>
     </p>
+
+    @if (paymentMethodTotals.length > 0) {
+      <ul class="item-totals-list">
+        @for (entry of paymentMethodTotals; track entry.method) {
+          <li class="item-total-row">
+            <span class="item-name">{{ methodLabel(entry.method) }}</span>
+            <span class="item-quantity">{{ entry.count }} orders</span>
+            <span class="item-revenue">${{ entry.total.toFixed(2) }}</span>
+          </li>
+        }
+      </ul>
+    }
   </section>
 
   <section class="report-section">

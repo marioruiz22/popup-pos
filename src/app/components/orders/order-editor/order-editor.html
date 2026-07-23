@@ -6,6 +6,9 @@
   <p class="order-meta">
     <span>Order #{{ order.orderNumber }}</span>
     <span>{{ order.status }}</span>
+    @if (order.paymentMethod) {
+      <span>{{ order.paymentMethod }}</span>
+    }
   </p>
 
   <label class="customer-field">
@@ -49,9 +52,74 @@
     Total: ${{ getTotal().toFixed(2) }}
   </h3>
 
+  @if (!isEditable && order.paymentMethod === 'cash' && order.amountReceived != null) {
+    <p class="payment-summary">
+      Received ${{ order.amountReceived.toFixed(2) }}
+      · Change ${{ (order.changeDue ?? 0).toFixed(2) }}
+    </p>
+  }
+
+  @if (showCompleteButton() && isEditable && order.items.length > 0) {
+    <section class="payment-section" aria-label="Payment">
+      <h4 class="payment-heading">Payment</h4>
+
+      <div class="payment-methods">
+        <button
+          type="button"
+          class="payment-method"
+          [class.active]="paymentMethod === 'cash'"
+          (click)="setPaymentMethod('cash')"
+        >
+          Cash
+        </button>
+        <button
+          type="button"
+          class="payment-method"
+          [class.active]="paymentMethod === 'mobile'"
+          (click)="setPaymentMethod('mobile')"
+        >
+          Mobile
+        </button>
+      </div>
+
+      @if (paymentMethod === 'cash') {
+        <label class="customer-field">
+          Cash received
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            [(ngModel)]="amountReceived"
+            placeholder="0.00"
+          />
+        </label>
+
+        <div class="quick-amounts">
+          <button type="button" class="quick-amount" (click)="setExactAmount()">Exact</button>
+          @for (amount of quickAmounts; track amount) {
+            <button type="button" class="quick-amount" (click)="setQuickAmount(amount)">
+              ${{ amount }}
+            </button>
+          }
+        </div>
+
+        <p class="change-due" [class.ready]="canComplete">
+          Change: ${{ changeDue.toFixed(2) }}
+        </p>
+      } @else {
+        <p class="mobile-note">Track as mobile payment. No card/terminal connection required.</p>
+      }
+    </section>
+  }
+
   <div class="order-actions">
     @if (showCompleteButton() && isEditable) {
-      <button type="button" class="action-button action-primary" (click)="completeOrder()">
+      <button
+        type="button"
+        class="action-button action-primary"
+        [disabled]="!canComplete"
+        (click)="completeOrder()"
+      >
         {{ completeButtonLabel() }}
       </button>
     }

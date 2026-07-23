@@ -15,14 +15,22 @@
 }
 
 .bubbles-scroll {
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: stretch;
-  gap: 0.5rem;
   overflow-x: auto;
+  overflow-y: hidden;
   min-width: 0;
   padding-bottom: 0.15rem;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+
+.bubbles-track {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: max-content;
+  min-width: 100%;
 }
 
 .order-bubble {
