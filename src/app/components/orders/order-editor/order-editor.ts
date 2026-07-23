@@ -1,7 +1,9 @@
 import { Component, DoCheck, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Order, PaymentMethod } from '../../../models/order';
+import { OrderItem } from '../../../models/order-item';
 import { OrderService } from '../../../services/order.service';
+import { ProductService } from '../../../services/product.service';
 
 @Component({
   selector: 'app-order-editor',
@@ -26,12 +28,17 @@ export class OrderEditor implements DoCheck {
   customerName = '';
   paymentMethod: PaymentMethod = 'cash';
   amountReceived: number | null = null;
+  discountInput: number | null = null;
+  tipInput: number | null = null;
 
   readonly quickAmounts = [5, 10, 20];
 
   private trackedOrderId = '';
 
-  constructor(private orderService: OrderService) {}
+  constructor(
+    private orderService: OrderService,
+    private productService: ProductService
+  ) {}
 
   ngDoCheck(): void {
     const order = this.order;
@@ -40,12 +47,16 @@ export class OrderEditor implements DoCheck {
       this.trackedOrderId = '';
       this.customerName = '';
       this.resetPayment();
+      this.discountInput = null;
+      this.tipInput = null;
       return;
     }
 
     if (order.id !== this.trackedOrderId) {
       this.trackedOrderId = order.id;
       this.customerName = order.customerName ?? '';
+      this.discountInput = order.discount ?? null;
+      this.tipInput = order.tip ?? null;
       this.resetPayment();
     }
   }
@@ -56,6 +67,22 @@ export class OrderEditor implements DoCheck {
 
   get isEditable(): boolean {
     return this.order?.status === 'open';
+  }
+
+  get itemCount(): number {
+    return this.order ? this.orderService.getItemCount(this.order) : 0;
+  }
+
+  get subtotal(): number {
+    return this.orderService.getSubtotal();
+  }
+
+  get discount(): number {
+    return this.orderService.getDiscount();
+  }
+
+  get tip(): number {
+    return this.orderService.getTip();
   }
 
   get orderTotal(): number {
@@ -70,6 +97,29 @@ export class OrderEditor implements DoCheck {
     return Math.max(0, Number((this.amountReceived - this.orderTotal).toFixed(2)));
   }
 
+  get canAddChangeAsTip(): boolean {
+    return this.paymentMethod === 'cash' && this.changeDue > 0;
+  }
+
+  get isCashReceivedInsufficient(): boolean {
+    return (
+      this.paymentMethod === 'cash' &&
+      (this.amountReceived === null || this.amountReceived < this.orderTotal)
+    );
+  }
+
+  get cashReceivedHint(): string {
+    if (this.amountReceived === null) {
+      return 'Enter cash received to continue';
+    }
+
+    if (this.amountReceived < this.orderTotal) {
+      return 'Cash received is less than total';
+    }
+
+    return '';
+  }
+
   get canComplete(): boolean {
     if (!this.order || this.order.items.length === 0) {
       return false;
@@ -82,8 +132,46 @@ export class OrderEditor implements DoCheck {
     return this.amountReceived !== null && this.amountReceived >= this.orderTotal;
   }
 
+  getItemImage(item: OrderItem): string | undefined {
+    return item.imageUrl ?? this.productService.getProductById(item.productId)?.imageUrl;
+  }
+
   saveCustomerName(): void {
     this.orderService.setCustomerName(this.customerName);
+  }
+
+  saveDiscount(): void {
+    this.orderService.setDiscount(this.discountInput ?? 0);
+    this.discountInput = this.order?.discount ?? null;
+  }
+
+  saveTip(): void {
+    this.orderService.setTip(this.tipInput ?? 0);
+    this.tipInput = this.order?.tip ?? null;
+  }
+
+  clearDiscount(): void {
+    this.discountInput = null;
+    this.orderService.setDiscount(0);
+  }
+
+  clearTip(): void {
+    this.tipInput = null;
+    this.orderService.setTip(0);
+  }
+
+  clearAmountReceived(): void {
+    this.amountReceived = null;
+  }
+
+  addChangeAsTip(): void {
+    if (!this.canAddChangeAsTip) {
+      return;
+    }
+
+    const nextTip = Number((this.tip + this.changeDue).toFixed(2));
+    this.orderService.setTip(nextTip);
+    this.tipInput = nextTip || null;
   }
 
   setPaymentMethod(method: PaymentMethod): void {
@@ -141,6 +229,8 @@ export class OrderEditor implements DoCheck {
     this.orderService.deleteOrder(order.id);
     this.trackedOrderId = '';
     this.customerName = '';
+    this.discountInput = null;
+    this.tipInput = null;
     this.resetPayment();
     this.orderDeleted.emit();
   }

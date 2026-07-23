@@ -1,11 +1,3 @@
-.order-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
 .order-empty {
   margin: 0;
   opacity: 0.75;
@@ -14,21 +6,77 @@
 .order-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin: 0 0 0.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+}
+
+.order-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  text-transform: capitalize;
   font-size: 0.95rem;
-  opacity: 0.85;
+  font-weight: 600;
+}
+
+.customer-card,
+.items-card,
+.totals-card,
+.payment-section {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 1.1rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.customer-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+
+.customer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+  color: rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+}
+
+.customer-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .customer-field {
   display: grid;
   gap: 0.25rem;
-  margin-bottom: 1rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .customer-field input {
-  min-height: 2.5rem;
-  padding: 0.5rem 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 1.1rem;
+  background: #fff;
 }
 
 .customer-field input:disabled {
@@ -36,21 +84,214 @@
   cursor: not-allowed;
 }
 
-.order-item-controls {
+.items-card-header {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.items-list {
+  display: grid;
+}
+
+.order-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 0.85rem 1rem;
+}
+
+.order-item + .order-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.item-thumb {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: cover;
+  border-radius: 0.95rem;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.item-thumb.placeholder {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+}
+
+.order-item-main {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  align-content: start;
+}
+
+.item-name {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.item-unit {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.qty-stepper {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.15rem;
+  padding: 0.15rem;
+  border-radius: 1.1rem;
+  background: #f1f3f5;
+  width: fit-content;
+}
+
+.order-item-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.45rem;
+  min-height: 100%;
+}
+
+.item-line-total {
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.qty-button,
+.remove-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 0.9rem;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.qty-button:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.remove-button {
+  color: #b00020;
+  background: transparent;
+}
+
+.remove-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
 .quantity {
   min-width: 1.5rem;
   text-align: center;
+  font-weight: 600;
+}
+
+.quantity.readonly {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.totals-card {
+  padding: 0.85rem 1rem;
+}
+
+.totals-row,
+.totals-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.money-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 2.5rem;
+  padding: 0 0.25rem 0 0.65rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.95rem;
+  background: #fff;
+}
+
+.money-input.disabled {
+  opacity: 0.7;
+}
+
+.money-prefix {
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 600;
+}
+
+.money-input input {
+  width: 5rem;
+  min-height: 2.35rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: right;
+  padding: 0.35rem 0.15rem;
+  font: inherit;
+}
+
+.money-clear {
+  width: 1.85rem;
+  height: 1.85rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.money-clear:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.money-clear:not(:disabled):hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.totals-grand {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 1.05rem;
+}
+
+.totals-grand strong {
+  font-size: 1.25rem;
 }
 
 .action-button {
   min-height: 2.75rem;
   padding: 0.75rem 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
+}
+
+.action-primary {
+  width: 100%;
+  border: none;
+  background: #1a56db;
+  color: #fff;
+  font-weight: 600;
 }
 
 .order-actions {
@@ -69,10 +310,7 @@
 }
 
 .payment-section {
-  margin: 1rem 0;
   padding: 0.85rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 0.75rem;
 }
 
 .payment-heading {
@@ -88,17 +326,78 @@
 }
 
 .payment-method {
-  min-height: 2.75rem;
+  min-height: 3.25rem;
+  padding: 0.85rem 0.75rem;
   border: 2px solid rgba(0, 0, 0, 0.12);
-  border-radius: 0.75rem;
+  border-radius: 1.1rem;
   background: #fff;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-weight: 600;
 }
 
 .payment-method.active {
   border-color: #1a56db;
   background: #eff6ff;
-  font-weight: 600;
+}
+
+.method-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+  color: rgba(0, 0, 0, 0.7);
+  flex-shrink: 0;
+}
+
+.payment-method.active .method-icon {
+  background: #dbeafe;
+  color: #1a56db;
+}
+
+.method-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.cash-field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.cash-field-label {
+  font-weight: 500;
+}
+
+.cash-field .money-input {
+  width: 100%;
+}
+
+.cash-field .money-input input {
+  flex: 1;
+  width: auto;
+}
+
+.money-input.invalid {
+  border-color: #dc2626;
+}
+
+.money-input.invalid .money-prefix,
+.money-input.invalid .money-clear {
+  color: #b91c1c;
+}
+
+.cash-hint {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
 }
 
 .quick-amounts {
@@ -111,13 +410,17 @@
 .quick-amount {
   min-height: 2.5rem;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 0.5rem;
+  border-radius: 0.95rem;
   background: #fff;
   cursor: pointer;
 }
 
 .change-due {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.65rem;
   font-size: 1.1rem;
   font-weight: 600;
   opacity: 0.7;
@@ -127,16 +430,73 @@
   opacity: 1;
 }
 
+.change-due strong {
+  text-align: right;
+}
+
+.add-tip-button {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px dashed rgba(26, 86, 219, 0.45);
+  border-radius: 1.1rem;
+  background: #eff6ff;
+  color: #1a56db;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .mobile-note,
 .payment-summary {
   margin: 0 0 0.75rem;
   opacity: 0.8;
 }
 
+:host(.touch-friendly) {
+  display: block;
+}
+
+:host(.touch-friendly) .item-thumb,
+:host(.touch-friendly) .customer-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+:host(.touch-friendly) .qty-button,
+:host(.touch-friendly) .remove-button,
 :host(.touch-friendly) .action-button,
-:host(.touch-friendly) .order-item-controls button,
 :host(.touch-friendly) .payment-method,
-:host(.touch-friendly) .quick-amount {
+:host(.touch-friendly) .quick-amount,
+:host(.touch-friendly) .add-tip-button {
   min-height: 2.75rem;
   min-width: 2.75rem;
+}
+
+:host(.touch-friendly) .qty-button,
+:host(.touch-friendly) .remove-button {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+:host(.touch-friendly) .customer-field input,
+:host(.touch-friendly) .money-input {
+  min-height: 3rem;
+}
+
+:host(.touch-friendly) .money-input input {
+  min-height: 2.75rem;
+  font-size: 1rem;
+}
+
+:host(.touch-friendly) .action-primary {
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+}
+
+:host(.touch-friendly) .order-number {
+  font-size: 1.5rem;
+}
+
+:host(.touch-friendly) .status-chip {
+  font-size: 1rem;
+  padding: 0.35rem 0.8rem;
 }

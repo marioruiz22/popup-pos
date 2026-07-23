@@ -40,7 +40,6 @@
   height: 2.75rem;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -50,10 +49,13 @@
 .cart-close {
   font-size: 1.5rem;
   line-height: 1;
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .cart-delete {
   color: #b00020;
+  background: transparent;
+  border-radius: 0;
 }
 
 .cart-delete svg {
@@ -66,6 +68,7 @@
   -webkit-overflow-scrolling: touch;
   padding: 1rem;
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: #f4f5f7;
 }
 
 @media (min-width: 900px) {
@@ -79,7 +82,7 @@
     width: min(100%, 32rem);
     height: auto;
     max-height: min(85vh, 40rem);
-    border-radius: 1rem;
+    border-radius: 1.25rem;
   }
 
   .cart-header {

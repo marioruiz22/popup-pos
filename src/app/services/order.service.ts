@@ -75,12 +75,16 @@ export class OrderService {
 
     if (existingItem) {
       existingItem.quantity++;
+      if (product.imageUrl) {
+        existingItem.imageUrl = product.imageUrl;
+      }
     } else {
       order.items.push({
         productId: product.id,
         name: product.name,
         price: product.price,
         quantity: 1,
+        imageUrl: product.imageUrl,
       });
     }
 
@@ -241,13 +245,58 @@ export class OrderService {
     this.save();
   }
 
-  getTotal(order?: Order): number {
+  setDiscount(amount: number): void {
+    const order = this.getCurrentOrder();
+    if (!order || order.status !== 'open') {
+      return;
+    }
+
+    const subtotal = this.getSubtotal(order);
+    const discount = Math.max(0, Math.min(subtotal, Number(amount) || 0));
+    order.discount = Number(discount.toFixed(2)) || undefined;
+    this.save();
+  }
+
+  setTip(amount: number): void {
+    const order = this.getCurrentOrder();
+    if (!order || order.status !== 'open') {
+      return;
+    }
+
+    const tip = Math.max(0, Number(amount) || 0);
+    order.tip = Number(tip.toFixed(2)) || undefined;
+    this.save();
+  }
+
+  getSubtotal(order?: Order): number {
     const target = order ?? this.getCurrentOrder();
     if (!target) {
       return 0;
     }
 
     return target.items.reduce((total, item) => total + item.price * item.quantity, 0);
+  }
+
+  getDiscount(order?: Order): number {
+    const target = order ?? this.getCurrentOrder();
+    return target?.discount ?? 0;
+  }
+
+  getTip(order?: Order): number {
+    const target = order ?? this.getCurrentOrder();
+    return target?.tip ?? 0;
+  }
+
+  getTotal(order?: Order): number {
+    const target = order ?? this.getCurrentOrder();
+    if (!target) {
+      return 0;
+    }
+
+    const subtotal = this.getSubtotal(target);
+    const discount = Math.min(this.getDiscount(target), subtotal);
+    const tip = this.getTip(target);
+    return Number((subtotal - discount + tip).toFixed(2));
   }
 
   getItemCount(order: Order): number {

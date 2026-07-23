@@ -4,53 +4,147 @@
 
 @if (order) {
   <p class="order-meta">
-    <span>Order #{{ order.orderNumber }}</span>
-    <span>{{ order.status }}</span>
+    <span class="order-number">Order #{{ order.orderNumber }}</span>
+    <span class="status-chip">{{ order.status }}</span>
     @if (order.paymentMethod) {
-      <span>{{ order.paymentMethod }}</span>
+      <span class="status-chip">{{ order.paymentMethod }}</span>
     }
   </p>
 
-  <label class="customer-field">
-    Customer name
-    <input
-      type="text"
-      [(ngModel)]="customerName"
-      (blur)="saveCustomerName()"
-      [disabled]="!isEditable"
-      placeholder="Optional"
-    />
-  </label>
+  <section class="customer-card" aria-label="Customer">
+    <span class="customer-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path
+          fill="currentColor"
+          d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12zm0 2.25c-3.6 0-6.75 1.8-6.75 4.05V20h13.5v-1.7c0-2.25-3.15-4.05-6.75-4.05z"
+        />
+      </svg>
+    </span>
+    <label class="customer-field">
+      Customer
+      <input
+        type="text"
+        [(ngModel)]="customerName"
+        (blur)="saveCustomerName()"
+        [disabled]="!isEditable"
+        placeholder="Optional"
+      />
+    </label>
+  </section>
 
   @if (order.items.length === 0) {
-    <p>No items yet</p>
+    <p class="order-empty">No items yet</p>
   } @else {
-    @for (item of order.items; track item.productId) {
-      <div class="order-item">
-        <span class="order-item-info">
-          {{ item.name }}
-          - ${{ (item.price * item.quantity).toFixed(2) }}
-        </span>
+    <section class="items-card" aria-label="Order items">
+      <header class="items-card-header">
+        {{ itemCount }} {{ itemCount === 1 ? 'item' : 'items' }}
+      </header>
 
-        @if (isEditable) {
-          <span class="order-item-controls">
-            <button type="button" (click)="decreaseQuantity(item.productId)" aria-label="Decrease quantity">-</button>
-            <span class="quantity">{{ item.quantity }}</span>
-            <button type="button" (click)="increaseQuantity(item.productId)" aria-label="Increase quantity">+</button>
-            <button type="button" (click)="removeItem(item.productId)" aria-label="Remove item">Remove</button>
-          </span>
-        } @else {
-          <span class="quantity">x{{ item.quantity }}</span>
+      <div class="items-list">
+        @for (item of order.items; track item.productId) {
+          <div class="order-item">
+            @if (getItemImage(item); as imageUrl) {
+              <img [src]="imageUrl" [alt]="item.name" class="item-thumb" />
+            } @else {
+              <div class="item-thumb placeholder" aria-hidden="true"></div>
+            }
+
+            <div class="order-item-main">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-unit">${{ item.price.toFixed(2) }} each</span>
+
+              @if (isEditable) {
+                <div class="qty-stepper">
+                  <button type="button" class="qty-button" (click)="decreaseQuantity(item.productId)" aria-label="Decrease quantity">−</button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button type="button" class="qty-button" (click)="increaseQuantity(item.productId)" aria-label="Increase quantity">+</button>
+                </div>
+              } @else {
+                <span class="quantity readonly">Qty {{ item.quantity }}</span>
+              }
+            </div>
+
+            <div class="order-item-side">
+              <span class="item-line-total">${{ (item.price * item.quantity).toFixed(2) }}</span>
+
+              @if (isEditable) {
+                <button type="button" class="remove-button" (click)="removeItem(item.productId)" aria-label="Remove item">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M4 7h16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                    <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              }
+            </div>
+          </div>
         }
       </div>
-    }
+    </section>
   }
 
-  <hr>
+  <section class="totals-card" aria-label="Order totals">
+    <div class="totals-row">
+      <span>Subtotal</span>
+      <span>${{ subtotal.toFixed(2) }}</span>
+    </div>
 
-  <h3>
-    Total: ${{ getTotal().toFixed(2) }}
-  </h3>
+    <div class="totals-input-row">
+      <span>Discount</span>
+      <div class="money-input" [class.disabled]="!isEditable">
+        <span class="money-prefix">$</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="discountInput"
+          (blur)="saveDiscount()"
+          [disabled]="!isEditable"
+          placeholder="0.00"
+        />
+        <button
+          type="button"
+          class="money-clear"
+          (click)="clearDiscount()"
+          [disabled]="!isEditable || discountInput == null"
+          aria-label="Clear discount"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+
+    <div class="totals-input-row">
+      <span>Tip</span>
+      <div class="money-input" [class.disabled]="!isEditable">
+        <span class="money-prefix">$</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="tipInput"
+          (blur)="saveTip()"
+          [disabled]="!isEditable"
+          placeholder="0.00"
+        />
+        <button
+          type="button"
+          class="money-clear"
+          (click)="clearTip()"
+          [disabled]="!isEditable || tipInput == null"
+          aria-label="Clear tip"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+
+    <div class="totals-row totals-grand">
+      <span>Total</span>
+      <strong>${{ getTotal().toFixed(2) }}</strong>
+    </div>
+  </section>
 
   @if (!isEditable && order.paymentMethod === 'cash' && order.amountReceived != null) {
     <p class="payment-summary">
@@ -70,7 +164,14 @@
           [class.active]="paymentMethod === 'cash'"
           (click)="setPaymentMethod('cash')"
         >
-          Cash
+          <span class="method-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" focusable="false">
+              <rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.75" />
+              <circle cx="12" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75" />
+              <path d="M7 10h.01M17 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span>Cash</span>
         </button>
         <button
           type="button"
@@ -78,21 +179,42 @@
           [class.active]="paymentMethod === 'mobile'"
           (click)="setPaymentMethod('mobile')"
         >
-          Mobile
+          <span class="method-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" focusable="false">
+              <rect x="7" y="2.5" width="10" height="19" rx="2" stroke="currentColor" stroke-width="1.75" />
+              <path d="M10 5.5h4M11 18.5h2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span>Mobile</span>
         </button>
       </div>
 
       @if (paymentMethod === 'cash') {
-        <label class="customer-field">
-          Cash received
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            [(ngModel)]="amountReceived"
-            placeholder="0.00"
-          />
-        </label>
+        <div class="cash-field">
+          <span class="cash-field-label">Cash received</span>
+          <div class="money-input" [class.invalid]="isCashReceivedInsufficient">
+            <span class="money-prefix">$</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="amountReceived"
+              placeholder="0.00"
+            />
+            <button
+              type="button"
+              class="money-clear"
+              (click)="clearAmountReceived()"
+              [disabled]="amountReceived == null"
+              aria-label="Clear cash received"
+            >
+              ×
+            </button>
+          </div>
+          @if (isCashReceivedInsufficient) {
+            <p class="cash-hint">{{ cashReceivedHint }}</p>
+          }
+        </div>
 
         <div class="quick-amounts">
           <button type="button" class="quick-amount" (click)="setExactAmount()">Exact</button>
@@ -103,9 +225,16 @@
           }
         </div>
 
-        <p class="change-due" [class.ready]="canComplete">
-          Change: ${{ changeDue.toFixed(2) }}
-        </p>
+        <div class="change-due" [class.ready]="canComplete">
+          <span>Change</span>
+          <strong>${{ changeDue.toFixed(2) }}</strong>
+        </div>
+
+        @if (canAddChangeAsTip) {
+          <button type="button" class="add-tip-button" (click)="addChangeAsTip()">
+            Add ${{ changeDue.toFixed(2) }} change as tip
+          </button>
+        }
       } @else {
         <p class="mobile-note">Track as mobile payment. No card/terminal connection required.</p>
       }

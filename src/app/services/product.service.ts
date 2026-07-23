@@ -55,6 +55,10 @@ export class ProductService {
     return this.sortByName([...this.products]);
   }
 
+  getProductById(id: string): Product | undefined {
+    return this.products.find((product) => product.id === id);
+  }
+
   addProduct(input: ProductInput): Product | null {
     const product = this.toProduct(crypto.randomUUID(), input);
     if (!product) {
