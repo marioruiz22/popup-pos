@@ -19,4 +19,9 @@ export const KNOWN_POPUPS: readonly PopupDefinition[] = [
     joinCode: 'DEMO',
     name: 'Demo Popup',
   },
+  {
+    id: 'lulus-kitchen',
+    joinCode: 'BTRIX0801',
+    name: 'Lulus Kitchen',
+  },
 ];
