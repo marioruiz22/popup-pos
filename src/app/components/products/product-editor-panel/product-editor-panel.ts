@@ -13,6 +13,7 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
   productId = input<string | null>(null);
   closed = output<void>();
   saved = output<void>();
+  deleted = output<void>();
 
   imageError = '';
   imageProcessing = false;
@@ -50,6 +51,28 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
 
   close(): void {
     this.closed.emit();
+  }
+
+  deleteProduct(): void {
+    const productId = this.productId();
+    if (!productId) {
+      return;
+    }
+
+    const product = this.productService.getProductById(productId);
+    if (!product) {
+      return;
+    }
+
+    const confirmed = confirm(`Delete "${product.name}"? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    if (this.productService.deleteProduct(productId)) {
+      this.deleted.emit();
+      this.close();
+    }
   }
 
   submit(): void {

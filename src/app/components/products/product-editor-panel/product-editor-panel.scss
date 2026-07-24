@@ -45,6 +45,25 @@
   cursor: pointer;
 }
 
+.editor-delete {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #b00020;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.editor-delete svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .editor-spacer {
   width: 2.75rem;
   height: 2.75rem;

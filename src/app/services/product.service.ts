@@ -96,6 +96,17 @@ export class ProductService {
     this.save();
   }
 
+  deleteProduct(id: string): boolean {
+    const index = this.products.findIndex((product) => product.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    this.products.splice(index, 1);
+    this.save();
+    return true;
+  }
+
   private toProduct(id: string, input: ProductInput): Product | null {
     const name = input.name.trim();
     if (!name || Number.isNaN(input.price) || input.price < 0) {
