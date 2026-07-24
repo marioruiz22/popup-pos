@@ -34,7 +34,7 @@
 .nav-link.active {
   font-weight: 600;
   background: rgba(0, 0, 0, 0.08);
-  color: #1a56db;
+  color: var(--brand);
 }
 
 :host(.nav-desktop) .app-nav {
@@ -47,7 +47,7 @@
 }
 
 :host(.nav-desktop) .nav-link.active {
-  background: #eff6ff;
+  background: var(--brand-soft);
 }
 
 :host(.nav-mobile) {

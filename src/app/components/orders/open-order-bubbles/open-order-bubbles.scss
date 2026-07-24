@@ -55,10 +55,10 @@
 }
 
 .order-bubble.active {
-  border-color: #1a56db;
-  background: #1a56db;
+  border-color: var(--brand);
+  background: var(--brand);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(26, 86, 219, 0.35);
+  box-shadow: 0 6px 16px var(--brand-glow);
 }
 
 .bubble-cart {
@@ -91,8 +91,8 @@
   height: 1.05rem;
   padding: 0 0.25rem;
   border-radius: 999px;
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--brand-muted);
+  color: var(--brand-ink);
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1.05rem;
@@ -101,9 +101,9 @@
 }
 
 .order-bubble.active .bubble-count {
-  background: #eff6ff;
-  color: #1a56db;
-  box-shadow: 0 0 0 1.5px #1a56db;
+  background: var(--brand-soft);
+  color: var(--brand);
+  box-shadow: 0 0 0 1.5px var(--brand);
 }
 
 .bubble-copy {
@@ -135,7 +135,7 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1.1rem;
   background: #fff;
-  color: #1a56db;
+  color: var(--brand);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   display: inline-flex;
   align-items: center;

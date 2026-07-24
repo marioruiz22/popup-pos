@@ -1,5 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
+:root {
+  --brand: #8b5cf6;
+  --brand-ink: #5b21b6;
+  --brand-soft: #f5f3ff;
+  --brand-muted: #ede9fe;
+  --brand-glow: rgba(139, 92, 246, 0.35);
+  --brand-glow-soft: rgba(139, 92, 246, 0.28);
+  --brand-dash: rgba(139, 92, 246, 0.45);
+}
+
 *,
 *::before,
 *::after {
@@ -20,4 +30,3 @@ body.checkout-open {
   overflow: hidden;
   overscroll-behavior: none;
 }
-

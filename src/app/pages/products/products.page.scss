@@ -35,7 +35,7 @@
   padding: 0;
   border: none;
   border-radius: 1.1rem;
-  background: #1a56db;
+  background: var(--brand);
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -102,8 +102,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e8edf5;
-  color: #1a56db;
+  background: var(--brand-muted);
+  color: var(--brand);
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.02em;

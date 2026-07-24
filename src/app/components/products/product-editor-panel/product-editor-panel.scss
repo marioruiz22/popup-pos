@@ -139,8 +139,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e8edf5;
-  color: #1a56db;
+  background: var(--brand-muted);
+  color: var(--brand);
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -168,10 +168,10 @@
   justify-content: center;
   min-height: 2.75rem;
   padding: 0.5rem 0.85rem;
-  border: 1px dashed rgba(26, 86, 219, 0.45);
+  border: 1px dashed var(--brand-dash);
   border-radius: 1.1rem;
-  background: #eff6ff;
-  color: #1a56db;
+  background: var(--brand-soft);
+  color: var(--brand);
   font-weight: 600;
   cursor: pointer;
 }
@@ -235,7 +235,7 @@
 }
 
 .toggle input:checked + .toggle-track {
-  background: #1a56db;
+  background: var(--brand);
 }
 
 .toggle input:checked + .toggle-track .toggle-thumb {
@@ -247,7 +247,7 @@
   min-height: 3.25rem;
   border: none;
   border-radius: 1.1rem;
-  background: #1a56db;
+  background: var(--brand);
   color: #fff;
   font-weight: 600;
   font-size: 1.05rem;

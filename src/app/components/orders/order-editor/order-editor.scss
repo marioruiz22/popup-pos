@@ -53,8 +53,8 @@
   width: 3.25rem;
   height: 3.25rem;
   border-radius: 50%;
-  background: #e8edf5;
-  color: #1a56db;
+  background: var(--brand-muted);
+  color: var(--brand);
   flex-shrink: 0;
 }
 
@@ -120,8 +120,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e8edf5;
-  color: #1a56db;
+  background: var(--brand-muted);
+  color: var(--brand);
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -296,7 +296,7 @@
 .action-primary {
   width: 100%;
   border: none;
-  background: #1a56db;
+  background: var(--brand);
   color: #fff;
   font-weight: 600;
 }
@@ -347,8 +347,8 @@
 }
 
 .payment-method.active {
-  border-color: #1a56db;
-  background: #eff6ff;
+  border-color: var(--brand);
+  background: var(--brand-soft);
 }
 
 .method-icon {
@@ -364,8 +364,8 @@
 }
 
 .payment-method.active .method-icon {
-  background: #dbeafe;
-  color: #1a56db;
+  background: var(--brand-muted);
+  color: var(--brand);
 }
 
 .method-icon svg {
@@ -444,10 +444,10 @@
 .add-tip-button {
   width: 100%;
   min-height: 2.75rem;
-  border: 1px dashed rgba(26, 86, 219, 0.45);
+  border: 1px dashed var(--brand-dash);
   border-radius: 1.1rem;
-  background: #eff6ff;
-  color: #1a56db;
+  background: var(--brand-soft);
+  color: var(--brand);
   font-weight: 600;
   cursor: pointer;
 }
