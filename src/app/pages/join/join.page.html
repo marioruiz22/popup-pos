@@ -10,7 +10,7 @@
 
     <h1 class="join-title">Join a popup</h1>
     <p class="join-subtitle">
-      Enter the join code for your fundraiser to unlock this device.
+      Enter the invitation code for your fundraiser. Only existing popups can be joined.
     </p>
 
     <form class="join-form" (ngSubmit)="submit()">
@@ -23,7 +23,7 @@
           autocapitalize="characters"
           spellcheck="false"
           maxlength="32"
-          placeholder="e.g. MANGO4821"
+          placeholder="Invitation code"
           [disabled]="submitting"
         />
       </label>
@@ -38,7 +38,7 @@
     </form>
 
     <p class="join-footnote">
-      Until cloud sync is enabled, this unlocks the app on this device only.
+      Ask your organizer for the code. Unknown codes will not create a new popup.
     </p>
   </section>
 </div>

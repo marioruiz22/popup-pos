@@ -32,6 +32,10 @@ export class SettingsPage {
     return this.popupSession.getJoinCode();
   }
 
+  get sessionPopupName(): string | null {
+    return this.popupSession.getPopupName();
+  }
+
   save(): void {
     this.settingsService.updateSettings({
       popupName: this.popupName,

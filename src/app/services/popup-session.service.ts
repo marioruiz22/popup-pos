@@ -1,8 +1,16 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { KNOWN_POPUPS } from '../data/known-popups';
+import { PopupDefinition } from '../models/popup';
 import { PopupSession } from '../models/popup-session';
 
 const STORAGE_KEY = 'popup-pos-popup-session';
 
+/**
+ * Current popup/event context for this device.
+ *
+ * Invitation model: users may only join popups that already exist in the registry.
+ * Unknown codes are rejected — join never creates a popup.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -11,27 +19,36 @@ export class PopupSessionService {
 
   readonly isJoined = computed(() => this.session() !== null);
   readonly currentSession = computed(() => this.session());
+  readonly currentPopupId = computed(() => this.session()?.popupId ?? null);
+  readonly currentPopupName = computed(() => this.session()?.popupName ?? null);
 
   constructor() {
     this.load();
   }
 
+  /** Primary id for future paths: popups/{popupId}/products, popups/{popupId}/orders */
   getPopupId(): string | null {
     return this.session()?.popupId ?? null;
+  }
+
+  getPopupName(): string | null {
+    return this.session()?.popupName ?? null;
   }
 
   getJoinCode(): string | null {
     return this.session()?.joinCode ?? null;
   }
 
+  getCurrentPopup(): PopupSession | null {
+    return this.session();
+  }
+
   /**
-   * Unlocks the app for this device using a join code.
+   * Join an existing popup by invitation code.
    *
-   * Local behavior (pre-Firebase): any non-empty code creates a session. Random visitors
-   * still get their own empty local data; this mainly establishes the UX + popupId shape.
-   *
-   * TODO(firebase): Call a Callable Function to verify the join code, then
-   * signInWithCustomToken() so Security Rules can enforce popupId. Reject invalid codes.
+   * Local: lookup against KNOWN_POPUPS only.
+   * TODO(firebase): Replace lookup with Callable Function / Firestore query by joinCode.
+   * TODO(firebase): On success, signInWithCustomToken() with popupId claim.
    */
   async joinWithCode(rawCode: string): Promise<{ ok: true } | { ok: false; error: string }> {
     const joinCode = this.normalizeJoinCode(rawCode);
@@ -39,16 +56,15 @@ export class PopupSessionService {
       return { ok: false, error: 'Enter a join code to continue.' };
     }
 
-    if (joinCode.length < 4) {
-      return { ok: false, error: 'Join codes are at least 4 characters.' };
+    const popup = this.findPopupByJoinCode(joinCode);
+    if (!popup) {
+      return { ok: false, error: 'Invalid join code. Check the code and try again.' };
     }
 
-    // TODO(firebase): const result = await verifyJoinCode(joinCode); use result.popupId / token
-    const popupId = this.localPopupIdFromCode(joinCode);
-
     const next: PopupSession = {
-      popupId,
-      joinCode,
+      popupId: popup.id,
+      joinCode: this.normalizeJoinCode(popup.joinCode),
+      popupName: popup.name,
       joinedAt: new Date().toISOString(),
     };
 
@@ -58,8 +74,8 @@ export class PopupSessionService {
   }
 
   /**
-   * Clears the local popup session (lock screen again).
-   * TODO(firebase): Also signOut() of Firebase Auth.
+   * Clears the local popup session (return to join screen).
+   * TODO(firebase): Also Firebase Auth signOut().
    */
   leavePopup(): void {
     this.session.set(null);
@@ -71,11 +87,14 @@ export class PopupSessionService {
   }
 
   /**
-   * Deterministic local id so the same join code maps to the same popupId on a device.
-   * TODO(firebase): Use the real Firestore popup document id from the verify response.
+   * Local invitation lookup.
+   * TODO(firebase): Query `popups` where joinCode == code (or callable verifyJoinCode).
    */
-  private localPopupIdFromCode(joinCode: string): string {
-    return `local_${joinCode}`;
+  private findPopupByJoinCode(joinCode: string): PopupDefinition | undefined {
+    const normalized = this.normalizeJoinCode(joinCode);
+    return KNOWN_POPUPS.find(
+      (popup) => this.normalizeJoinCode(popup.joinCode) === normalized
+    );
   }
 
   private load(): void {
@@ -86,13 +105,24 @@ export class PopupSessionService {
 
     try {
       const data = JSON.parse(raw) as Partial<PopupSession>;
-      if (typeof data.popupId === 'string' && typeof data.joinCode === 'string') {
-        this.session.set({
-          popupId: data.popupId,
-          joinCode: data.joinCode,
-          joinedAt: typeof data.joinedAt === 'string' ? data.joinedAt : new Date().toISOString(),
-        });
+      if (typeof data.popupId !== 'string' || typeof data.joinCode !== 'string') {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
       }
+
+      // Re-validate against the current registry so removed codes cannot stay unlocked.
+      const popup = this.findPopupByJoinCode(data.joinCode);
+      if (!popup || popup.id !== data.popupId) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+
+      this.session.set({
+        popupId: popup.id,
+        joinCode: this.normalizeJoinCode(popup.joinCode),
+        popupName: popup.name,
+        joinedAt: typeof data.joinedAt === 'string' ? data.joinedAt : new Date().toISOString(),
+      });
     } catch {
       localStorage.removeItem(STORAGE_KEY);
     }
