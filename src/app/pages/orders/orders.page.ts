@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Order } from '../../models/order';
 import { OrderService } from '../../services/order.service';
 import { OrderDetailPanel } from '../../components/orders/order-detail-panel/order-detail-panel';
@@ -12,7 +12,9 @@ export type OrdersRange = 'today' | 'week' | 'year' | 'all';
   styleUrl: './orders.page.scss',
 })
 export class OrdersPage {
-  range: OrdersRange = 'today';
+  private readonly orderService = inject(OrderService);
+
+  private readonly rangeSignal = signal<OrdersRange>('today');
   showItemBreakdown = false;
   detailOrderId: string | null = null;
 
@@ -23,35 +25,33 @@ export class OrdersPage {
     { id: 'all', label: 'All time' },
   ];
 
-  constructor(private orderService: OrderService) {}
+  readonly loadError = this.orderService.lastCompletedSyncError;
 
-  get filteredOrders(): Order[] {
-    return this.orderService
-      .getCompletedOrders()
-      .filter((order) => this.isInRange(order))
-      .sort((a, b) => this.getOrderDate(b).getTime() - this.getOrderDate(a).getTime());
-  }
+  readonly filteredOrders = computed(() =>
+    this.orderService
+      .completedOrdersList()
+      .filter((order) => this.isInRange(order, this.rangeSignal()))
+      .sort((a, b) => this.getOrderDate(b).getTime() - this.getOrderDate(a).getTime())
+  );
 
-  get orderCount(): number {
-    return this.filteredOrders.length;
-  }
+  readonly orderCount = computed(() => this.filteredOrders().length);
 
-  get totalSales(): number {
-    return this.filteredOrders.reduce((total, order) => total + this.getTotal(order), 0);
-  }
+  readonly totalSales = computed(() =>
+    this.filteredOrders().reduce((total, order) => total + this.getTotal(order), 0)
+  );
 
-  get itemsSold(): number {
-    return this.filteredOrders.reduce((total, order) => total + this.getItemCount(order), 0);
-  }
+  readonly itemsSold = computed(() =>
+    this.filteredOrders().reduce((total, order) => total + this.getItemCount(order), 0)
+  );
 
-  get totalTips(): number {
-    return this.filteredOrders.reduce((total, order) => total + (order.tip ?? 0), 0);
-  }
+  readonly totalTips = computed(() =>
+    this.filteredOrders().reduce((total, order) => total + (order.tip ?? 0), 0)
+  );
 
-  get itemBreakdown(): { name: string; quantity: number; total: number }[] {
+  readonly itemBreakdown = computed(() => {
     const totals = new Map<string, { name: string; quantity: number; total: number }>();
 
-    for (const order of this.filteredOrders) {
+    for (const order of this.filteredOrders()) {
       for (const item of order.items) {
         const existing = totals.get(item.productId);
         if (existing) {
@@ -68,10 +68,14 @@ export class OrdersPage {
     }
 
     return [...totals.values()].sort((a, b) => b.quantity - a.quantity || a.name.localeCompare(b.name));
+  });
+
+  get range(): OrdersRange {
+    return this.rangeSignal();
   }
 
   setRange(range: OrdersRange): void {
-    this.range = range;
+    this.rangeSignal.set(range);
   }
 
   toggleItemBreakdown(): void {
@@ -121,19 +125,19 @@ export class OrdersPage {
     });
   }
 
-  private isInRange(order: Order): boolean {
-    if (this.range === 'all') {
+  private isInRange(order: Order, range: OrdersRange): boolean {
+    if (range === 'all') {
       return true;
     }
 
     const date = this.getOrderDate(order);
     const now = new Date();
 
-    if (this.range === 'today') {
+    if (range === 'today') {
       return date >= this.startOfDay(now);
     }
 
-    if (this.range === 'week') {
+    if (range === 'week') {
       return date >= this.startOfWeek(now);
     }
 

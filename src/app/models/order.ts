@@ -2,7 +2,7 @@ import { OrderItem } from './order-item';
 
 /**
  * Order lifecycle:
- * draft (local only) → completed (future Firestore) → reopen → draft (same id) → complete again (update)
+ * draft (local only) → completed (Firestore) → reopen → draft (same id) → complete again (update same doc)
  */
 export type OrderStatus = 'draft' | 'completed' | 'cancelled';
 

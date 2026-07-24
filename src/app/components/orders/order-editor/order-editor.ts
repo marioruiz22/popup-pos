@@ -222,20 +222,29 @@ export class OrderEditor implements DoCheck {
     this.orderService.removeItem(productId);
   }
 
-  completeOrder(): void {
+  async completeOrder(): Promise<void> {
     if (!this.canComplete) {
       return;
     }
 
-    this.orderService.completeOrder({
+    const synced = await this.orderService.completeOrder({
       paymentMethod: this.paymentMethod,
       amountReceived: this.paymentMethod === 'cash' ? (this.amountReceived ?? undefined) : undefined,
     });
+
+    if (!synced) {
+      const message =
+        this.orderService.lastCompletedSyncError() ??
+        'Could not sync completed order. Check your connection and try again.';
+      alert(message);
+      return;
+    }
+
     this.resetPayment();
     this.orderCompleted.emit();
   }
 
-  deleteOrder(): void {
+  async deleteOrder(): Promise<void> {
     const order = this.order;
     if (!order) {
       return;
@@ -248,7 +257,7 @@ export class OrderEditor implements DoCheck {
       return;
     }
 
-    this.orderService.deleteOrder(order.id);
+    await this.orderService.deleteOrder(order.id);
     this.trackedOrderId = '';
     this.customerName = '';
     this.discountInput = null;

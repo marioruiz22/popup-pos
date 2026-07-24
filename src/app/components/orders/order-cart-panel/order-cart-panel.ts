@@ -25,7 +25,7 @@ export class OrderCartPanel implements OnInit, OnDestroy {
     this.closed.emit();
   }
 
-  deleteOrder(): void {
+  async deleteOrder(): Promise<void> {
     const order = this.orderService.getCurrentOrder();
     if (!order) {
       return;
@@ -38,7 +38,7 @@ export class OrderCartPanel implements OnInit, OnDestroy {
       return;
     }
 
-    this.orderService.deleteOrder(order.id);
+    await this.orderService.deleteOrder(order.id);
     this.close();
   }
 

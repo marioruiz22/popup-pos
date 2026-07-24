@@ -1,13 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  type Unsubscribe,
+} from 'firebase/firestore';
 import { Order, PaymentMethod } from '../models/order';
+import { OrderItem } from '../models/order-item';
 import { Product } from '../models/product';
+import { FIRESTORE } from '../firebase/firebase.providers';
 import { PopupSessionService } from './popup-session.service';
 import { SettingsService } from './settings.service';
 
-/** @deprecated Migrated into draft + completed storage keys. */
+/** @deprecated Migrated into draft storage key. */
 const LEGACY_STORAGE_KEY = 'popup-pos-orders';
-
 const DRAFT_STORAGE_KEY = 'popup-pos-draft-orders';
+/** @deprecated Completed orders now live in Firestore. */
 const COMPLETED_STORAGE_KEY = 'popup-pos-completed-orders';
 
 interface DraftStore {
@@ -15,14 +25,24 @@ interface DraftStore {
   currentOrderId: string;
 }
 
-interface CompletedStore {
-  orders: Order[];
-  /**
-   * Local placeholder counter until Firebase assigns daily order numbers.
-   * TODO(firebase): Remove local nextOrderNumber. Firestore will assign the next
-   * daily sequence (resets to 1 each calendar day) and guarantee uniqueness.
-   */
-  nextOrderNumber: number;
+/** Firestore document shape for completed orders (doc id = order UUID). */
+interface CompletedOrderDoc {
+  id: string;
+  orderNumber: number;
+  customerName?: string;
+  items: OrderItem[];
+  status: 'completed';
+  createdAt: string;
+  completedAt: string;
+  discount?: number;
+  tip?: number;
+  subtotal: number;
+  total: number;
+  paymentMethod?: PaymentMethod;
+  amountReceived?: number;
+  changeDue?: number;
+  deviceName?: string;
+  popupId: string;
 }
 
 export interface PaymentDetails {
@@ -34,34 +54,45 @@ export interface PaymentDetails {
   providedIn: 'root',
 })
 export class OrderService {
+  private readonly firestore = inject(FIRESTORE);
+  private readonly settingsService = inject(SettingsService);
+  private readonly popupSessionService = inject(PopupSessionService);
+
   /**
-   * TODO(firebase): Replace with a cloud-assigned daily sequence.
-   * Local counter is temporary so completed orders still get display numbers offline.
+   * Local placeholder until Firebase assigns daily order numbers.
+   * Seeded from the max completed order number loaded for the current popup.
    */
   private nextOrderNumber = 1;
 
   /** In-progress orders. Local only — never synchronized. */
   private draftOrders: Order[] = [];
 
-  /**
-   * Completed orders.
-   * TODO(firebase): Persist/load these from Firestore instead of localStorage.
-   * Drafts must never be written to Firestore.
-   */
-  private completedOrders: Order[] = [];
+  /** Completed orders for the current popup (Firestore-backed). */
+  private readonly completedOrdersSignal = signal<Order[]>([]);
 
   private currentOrderId = '';
+  private unsubscribeCompleted: Unsubscribe | null = null;
+  private boundPopupId: string | null = null;
+  private readonly completedSyncError = signal<string | null>(null);
 
-  constructor(
-    private settingsService: SettingsService,
-    private popupSessionService: PopupSessionService
-  ) {
-    this.load();
+  readonly completedOrdersList = computed(() =>
+    this.completedOrdersSignal().filter((order) => order.status === 'completed')
+  );
+
+  readonly lastCompletedSyncError = computed(() => this.completedSyncError());
+
+  constructor() {
+    this.loadDrafts();
+
+    effect(() => {
+      const popupId = this.popupSessionService.currentPopupId();
+      untracked(() => this.bindCompletedOrders(popupId));
+    });
   }
 
   /** All orders currently in memory (drafts + completed). Prefer specific getters. */
   getOrders(): Order[] {
-    return [...this.draftOrders, ...this.completedOrders];
+    return [...this.draftOrders, ...this.completedOrdersSignal()];
   }
 
   getDraftOrders(): Order[] {
@@ -74,7 +105,7 @@ export class OrderService {
   }
 
   getCompletedOrders(): Order[] {
-    return this.completedOrders.filter((order) => order.status === 'completed');
+    return this.completedOrdersList();
   }
 
   getCurrentOrder(): Order | null {
@@ -115,27 +146,31 @@ export class OrderService {
         existingItem.imageUrl = product.imageUrl;
       }
     } else {
-      order.items.push({
+      const item: OrderItem = {
         productId: product.id,
         name: product.name,
         price: product.price,
         quantity: 1,
-        imageUrl: product.imageUrl,
-      });
+      };
+      if (product.imageUrl) {
+        item.imageUrl = product.imageUrl;
+      }
+      order.items.push(item);
     }
 
     this.saveDrafts();
   }
 
   /**
-   * Completes the current draft: assigns an order number if needed, stamps payment/device,
-   * and moves the order into completed storage (updating in place when re-completing).
+   * Completes the current draft and upserts it to Firestore under the same UUID.
+   * Re-completing a reopened order updates that same document (no duplicate).
+   * Returns false if the cloud write fails (order stays a draft).
    */
-  completeOrder(details: PaymentDetails): void {
+  async completeOrder(details: PaymentDetails): Promise<boolean> {
     const order = this.getCurrentOrder();
 
     if (!order || order.status !== 'draft' || order.items.length === 0) {
-      return;
+      return false;
     }
 
     const total = this.getTotal(order);
@@ -143,7 +178,7 @@ export class OrderService {
     if (details.paymentMethod === 'cash') {
       const amountReceived = details.amountReceived ?? 0;
       if (amountReceived < total) {
-        return;
+        return false;
       }
 
       order.paymentMethod = 'cash';
@@ -155,47 +190,76 @@ export class OrderService {
       order.changeDue = 0;
     }
 
+    const popupId = this.popupSessionService.getPopupId();
+    if (!popupId) {
+      this.completedSyncError.set('Join a popup before completing orders to the cloud.');
+      return false;
+    }
+
     // Assign display number only on first completion. Reopened orders keep theirs.
-    // TODO(firebase): Replace assignLocalOrderNumber() with a Firestore transaction /
-    // callable that returns the next number for the current calendar day (starts at 1 daily).
+    // TODO(firebase): Replace with a Firestore daily counter transaction per popup.
     if (order.orderNumber == null) {
       order.orderNumber = this.assignLocalOrderNumber();
     }
 
-    order.status = 'completed';
-    order.completedAt = new Date();
-    const deviceName = this.settingsService.getDeviceName().trim();
-    order.deviceName = deviceName || undefined;
-    const popupId = this.popupSessionService.getPopupId();
-    order.popupId = popupId || undefined;
+    const completedAt = new Date();
+    const deviceName = this.settingsService.getDeviceName().trim() || undefined;
+    const snapshot: Order = {
+      ...order,
+      items: order.items.map((item) => ({ ...item })),
+      status: 'completed',
+      completedAt,
+      deviceName,
+      popupId,
+    };
 
-    this.moveDraftToCompleted(order);
+    try {
+      await setDoc(this.orderDocRef(popupId, snapshot.id), this.toCompletedDoc(snapshot, popupId));
+      this.completedSyncError.set(null);
+    } catch (error) {
+      console.error('Failed to sync completed order to Firestore', error);
+      this.completedSyncError.set('Could not sync completed order. Check your connection.');
+      // Leave payment fields on the draft so the cashier can retry without re-entering cash.
+      this.saveDrafts();
+      return false;
+    }
+
+    order.status = 'completed';
+    order.completedAt = completedAt;
+    order.deviceName = deviceName;
+    order.popupId = popupId;
+
+    this.moveDraftToCompletedLocal(order);
     this.selectNextDraftOrder();
     this.saveDrafts();
-    this.saveCompleted();
+    return true;
   }
 
   /** @deprecated Use completeOrder(). */
   markPaid(details: PaymentDetails): void {
-    this.completeOrder(details);
+    void this.completeOrder(details);
   }
 
   /**
    * Reopens a completed order as a draft with the same UUID and order number.
-   * Does not create a new order.
+   * Removes it from the completed Firestore collection so history stays accurate;
+   * completing again upserts the same document id.
    */
-  reopenOrder(id: string): void {
-    const index = this.completedOrders.findIndex((item) => item.id === id);
+  async reopenOrder(id: string): Promise<void> {
+    const orders = this.completedOrdersSignal();
+    const index = orders.findIndex((item) => item.id === id);
     if (index === -1) {
       return;
     }
 
-    const order = this.completedOrders[index];
+    const order = { ...orders[index], items: orders[index].items.map((item) => ({ ...item })) };
     if (order.status !== 'completed') {
       return;
     }
 
-    this.completedOrders.splice(index, 1);
+    const popupId = order.popupId || this.popupSessionService.getPopupId();
+
+    this.completedOrdersSignal.update((list) => list.filter((item) => item.id !== id));
 
     order.status = 'draft';
     order.paymentMethod = undefined;
@@ -209,13 +273,21 @@ export class OrderService {
     this.draftOrders.push(order);
     this.currentOrderId = id;
     this.saveDrafts();
-    this.saveCompleted();
+
+    if (popupId) {
+      try {
+        await deleteDoc(this.orderDocRef(popupId, id));
+        this.completedSyncError.set(null);
+      } catch {
+        this.completedSyncError.set('Could not update cloud order while reopening.');
+      }
+    }
   }
 
   getOrderById(id: string): Order | null {
     return (
       this.draftOrders.find((order) => order.id === id) ??
-      this.completedOrders.find((order) => order.id === id) ??
+      this.completedOrdersSignal().find((order) => order.id === id) ??
       null
     );
   }
@@ -232,7 +304,7 @@ export class OrderService {
     this.saveDrafts();
   }
 
-  deleteOrder(id: string): void {
+  async deleteOrder(id: string): Promise<void> {
     const draftIndex = this.draftOrders.findIndex((order) => order.id === id);
     if (draftIndex !== -1) {
       this.draftOrders.splice(draftIndex, 1);
@@ -245,11 +317,21 @@ export class OrderService {
       return;
     }
 
-    const completedIndex = this.completedOrders.findIndex((order) => order.id === id);
-    if (completedIndex !== -1) {
-      this.completedOrders.splice(completedIndex, 1);
-      // TODO(firebase): Also delete the Firestore document for this completed order.
-      this.saveCompleted();
+    const completed = this.completedOrdersSignal().find((order) => order.id === id);
+    if (!completed) {
+      return;
+    }
+
+    this.completedOrdersSignal.update((list) => list.filter((order) => order.id !== id));
+
+    const popupId = completed.popupId || this.popupSessionService.getPopupId();
+    if (popupId) {
+      try {
+        await deleteDoc(this.orderDocRef(popupId, id));
+        this.completedSyncError.set(null);
+      } catch {
+        this.completedSyncError.set('Could not delete completed order from the cloud.');
+      }
     }
   }
 
@@ -393,20 +475,71 @@ export class OrderService {
     return order.items.reduce((count, item) => count + item.quantity, 0);
   }
 
-  private moveDraftToCompleted(order: Order): void {
+  private bindCompletedOrders(popupId: string | null): void {
+    if (popupId === this.boundPopupId && this.unsubscribeCompleted) {
+      return;
+    }
+
+    this.teardownCompletedListener();
+    this.boundPopupId = popupId;
+    this.completedSyncError.set(null);
+
+    if (!popupId) {
+      this.completedOrdersSignal.set([]);
+      this.nextOrderNumber = 1;
+      return;
+    }
+
+    try {
+      const ordersRef = collection(this.firestore, 'popups', popupId, 'orders');
+      this.unsubscribeCompleted = onSnapshot(
+        ordersRef,
+        (snapshot) => {
+          const orders = snapshot.docs
+            .map((orderDoc) => this.fromCompletedDoc(orderDoc.id, orderDoc.data() as CompletedOrderDoc))
+            .filter((order) => order.status === 'completed');
+
+          this.completedOrdersSignal.set(orders);
+          this.nextOrderNumber = Math.max(
+            1,
+            ...orders.map((order) => (order.orderNumber ?? 0) + 1)
+          );
+          this.completedSyncError.set(null);
+        },
+        () => {
+          this.completedSyncError.set('Could not load completed orders from the cloud.');
+        }
+      );
+    } catch {
+      this.completedOrdersSignal.set([]);
+      this.completedSyncError.set('Could not load completed orders from the cloud.');
+    }
+  }
+
+  private teardownCompletedListener(): void {
+    this.unsubscribeCompleted?.();
+    this.unsubscribeCompleted = null;
+  }
+
+  private orderDocRef(popupId: string, orderId: string) {
+    return doc(this.firestore, 'popups', popupId, 'orders', orderId);
+  }
+
+  private moveDraftToCompletedLocal(order: Order): void {
     const draftIndex = this.draftOrders.findIndex((item) => item.id === order.id);
     if (draftIndex !== -1) {
       this.draftOrders.splice(draftIndex, 1);
     }
 
-    const existingIndex = this.completedOrders.findIndex((item) => item.id === order.id);
-    if (existingIndex !== -1) {
-      this.completedOrders[existingIndex] = order;
-    } else {
-      this.completedOrders.push(order);
-    }
-
-    // TODO(firebase): Upsert this completed order document in Firestore (same UUID).
+    this.completedOrdersSignal.update((list) => {
+      const existingIndex = list.findIndex((item) => item.id === order.id);
+      if (existingIndex === -1) {
+        return [...list, order];
+      }
+      const next = [...list];
+      next[existingIndex] = order;
+      return next;
+    });
   }
 
   private selectNextDraftOrder(): void {
@@ -427,15 +560,84 @@ export class OrderService {
     };
   }
 
-  /**
-   * Temporary local numbering until Firebase owns the sequence.
-   * TODO(firebase): Delete this method; daily reset + uniqueness come from Firestore.
-   */
   private assignLocalOrderNumber(): number {
     return this.nextOrderNumber++;
   }
 
-  private load(): void {
+  private toCompletedDoc(order: Order, popupId: string): CompletedOrderDoc {
+    const subtotal = this.getSubtotal(order);
+    const discount = this.getDiscount(order);
+    const tip = this.getTip(order);
+    const total = this.getTotal(order);
+
+    // Firestore rejects `undefined` field values. Build a plain object with only set fields.
+    const docData: CompletedOrderDoc = {
+      id: order.id,
+      orderNumber: order.orderNumber ?? 0,
+      items: order.items.map((item) => this.toCompletedItemDoc(item)),
+      status: 'completed',
+      createdAt: order.createdAt.toISOString(),
+      completedAt: (order.completedAt ?? new Date()).toISOString(),
+      subtotal,
+      total,
+      popupId,
+    };
+
+    if (order.customerName) {
+      docData.customerName = order.customerName;
+    }
+    if (discount) {
+      docData.discount = discount;
+    }
+    if (tip) {
+      docData.tip = tip;
+    }
+    if (order.paymentMethod) {
+      docData.paymentMethod = order.paymentMethod;
+    }
+    if (order.amountReceived != null) {
+      docData.amountReceived = order.amountReceived;
+    }
+    if (order.changeDue != null) {
+      docData.changeDue = order.changeDue;
+    }
+    if (order.deviceName) {
+      docData.deviceName = order.deviceName;
+    }
+
+    return docData;
+  }
+
+  /** Line items for Firestore — omit undefined/optional image payloads (can be huge data URLs). */
+  private toCompletedItemDoc(item: OrderItem): OrderItem {
+    return {
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+    };
+  }
+
+  private fromCompletedDoc(id: string, data: CompletedOrderDoc): Order {
+    return {
+      id,
+      orderNumber: typeof data.orderNumber === 'number' ? data.orderNumber : undefined,
+      customerName: data.customerName,
+      items: Array.isArray(data.items) ? data.items : [],
+      status: 'completed',
+      createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+      discount: data.discount,
+      tip: data.tip,
+      paymentMethod: data.paymentMethod,
+      amountReceived: data.amountReceived,
+      changeDue: data.changeDue,
+      deviceName: data.deviceName,
+      popupId: data.popupId,
+    };
+  }
+
+  private loadDrafts(): void {
     this.migrateLegacyOrdersIfNeeded();
 
     const draftStore = this.readDraftStore();
@@ -444,16 +646,10 @@ export class OrderService {
       this.draftOrders.find((order) => order.id === draftStore.currentOrderId && order.status === 'draft')
         ?.id ?? '';
 
-    const completedStore = this.readCompletedStore();
-    this.completedOrders = completedStore.orders.map((order) => this.normalizeOrder(order));
-    this.nextOrderNumber = Math.max(
-      completedStore.nextOrderNumber ?? 1,
-      ...this.completedOrders.map((order) => (order.orderNumber ?? 0) + 1),
-      1
-    );
-
     this.saveDrafts();
-    this.saveCompleted();
+
+    // Completed orders are loaded from Firestore for the active popup.
+    localStorage.removeItem(COMPLETED_STORAGE_KEY);
   }
 
   private migrateLegacyOrdersIfNeeded(): void {
@@ -462,7 +658,6 @@ export class OrderService {
       return;
     }
 
-    // Skip if new stores already exist.
     if (localStorage.getItem(DRAFT_STORAGE_KEY) || localStorage.getItem(COMPLETED_STORAGE_KEY)) {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
       return;
@@ -472,7 +667,6 @@ export class OrderService {
       const data = JSON.parse(raw) as {
         orders?: Array<Record<string, unknown>>;
         currentOrderId?: string;
-        nextOrderNumber?: number;
       };
 
       if (!Array.isArray(data.orders)) {
@@ -481,43 +675,28 @@ export class OrderService {
       }
 
       const drafts: Order[] = [];
-      const completed: Order[] = [];
 
       for (const rawOrder of data.orders) {
         const legacyStatus = String(rawOrder['status'] ?? '');
         const order = this.normalizeOrder(rawOrder as unknown as Order);
 
-        if (legacyStatus === 'paid' || order.status === 'completed') {
-          order.status = 'completed';
-          completed.push(order);
-        } else if (legacyStatus === 'cancelled' || order.status === 'cancelled') {
-          order.status = 'cancelled';
-          // Cancelled legacy orders are kept with completed store for history simplicity.
-          completed.push(order);
-        } else {
-          order.status = 'draft';
-          order.orderNumber = undefined;
-          order.completedAt = undefined;
-          drafts.push(order);
+        if (legacyStatus === 'paid' || order.status === 'completed' || order.status === 'cancelled') {
+          // Completed legacy history is not auto-uploaded; start fresh in Firestore.
+          continue;
         }
+
+        order.status = 'draft';
+        order.orderNumber = undefined;
+        order.completedAt = undefined;
+        drafts.push(order);
       }
 
       const currentOrderId =
         drafts.find((order) => order.id === data.currentOrderId)?.id ?? drafts[0]?.id ?? '';
 
-      const nextOrderNumber = Math.max(
-        data.nextOrderNumber ?? 1,
-        ...completed.map((order) => (order.orderNumber ?? 0) + 1),
-        1
-      );
-
       localStorage.setItem(
         DRAFT_STORAGE_KEY,
         JSON.stringify({ orders: drafts, currentOrderId } satisfies DraftStore)
-      );
-      localStorage.setItem(
-        COMPLETED_STORAGE_KEY,
-        JSON.stringify({ orders: completed, nextOrderNumber } satisfies CompletedStore)
       );
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {
@@ -561,7 +740,6 @@ export class OrderService {
     };
 
     if (normalized.status === 'draft' && !normalized.completedAt && legacyStatus === 'open') {
-      // Legacy in-progress orders received numbers at creation; drafts should not.
       normalized.orderNumber = undefined;
     }
 
@@ -585,38 +763,11 @@ export class OrderService {
     }
   }
 
-  private readCompletedStore(): CompletedStore {
-    const raw = localStorage.getItem(COMPLETED_STORAGE_KEY);
-    if (!raw) {
-      return { orders: [], nextOrderNumber: 1 };
-    }
-
-    try {
-      const data = JSON.parse(raw) as CompletedStore;
-      return {
-        orders: Array.isArray(data.orders) ? data.orders : [],
-        nextOrderNumber: data.nextOrderNumber ?? 1,
-      };
-    } catch {
-      return { orders: [], nextOrderNumber: 1 };
-    }
-  }
-
   private saveDrafts(): void {
-    // Drafts stay on-device only.
     const data: DraftStore = {
       orders: this.draftOrders,
       currentOrderId: this.currentOrderId,
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
-  }
-
-  private saveCompleted(): void {
-    // TODO(firebase): Sync completedOrders to Firestore; keep local cache optional for offline.
-    const data: CompletedStore = {
-      orders: this.completedOrders,
-      nextOrderNumber: this.nextOrderNumber,
-    };
-    localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(data));
   }
 }

@@ -22,19 +22,19 @@
     <div class="summary-grid">
       <div class="summary-stat">
         <span class="summary-label">Total sales</span>
-        <strong class="summary-value">${{ totalSales.toFixed(2) }}</strong>
+        <strong class="summary-value">${{ totalSales().toFixed(2) }}</strong>
       </div>
       <div class="summary-stat">
         <span class="summary-label">Orders</span>
-        <strong class="summary-value">{{ orderCount }}</strong>
+        <strong class="summary-value">{{ orderCount() }}</strong>
       </div>
       <div class="summary-stat">
         <span class="summary-label">Items sold</span>
-        <strong class="summary-value">{{ itemsSold }}</strong>
+        <strong class="summary-value">{{ itemsSold() }}</strong>
       </div>
       <div class="summary-stat">
         <span class="summary-label">Tips</span>
-        <strong class="summary-value">${{ totalTips.toFixed(2) }}</strong>
+        <strong class="summary-value">${{ totalTips().toFixed(2) }}</strong>
       </div>
     </div>
 
@@ -43,11 +43,11 @@
     </button>
 
     @if (showItemBreakdown) {
-      @if (itemBreakdown.length === 0) {
+      @if (itemBreakdown().length === 0) {
         <p class="section-empty">No items sold in this range</p>
       } @else {
         <ul class="breakdown-list">
-          @for (item of itemBreakdown; track item.name) {
+          @for (item of itemBreakdown(); track item.name) {
             <li class="breakdown-row">
               <span class="breakdown-name">{{ item.name }}</span>
               <span class="breakdown-qty">{{ item.quantity }} sold</span>
@@ -61,14 +61,18 @@
 
   <section class="orders-card" aria-label="Completed orders">
     <header class="orders-card-header">
-      {{ orderCount }} {{ orderCount === 1 ? 'order' : 'orders' }}
+      {{ orderCount() }} {{ orderCount() === 1 ? 'order' : 'orders' }}
     </header>
 
-    @if (filteredOrders.length === 0) {
+    @if (loadError()) {
+      <p class="section-empty padded">{{ loadError() }}</p>
+    }
+
+    @if (filteredOrders().length === 0) {
       <p class="section-empty padded">No completed orders in this range</p>
     } @else {
       <div class="orders-list">
-        @for (order of filteredOrders; track order.id) {
+        @for (order of filteredOrders(); track order.id) {
           <button type="button" class="order-row" (click)="openDetails(order.id)">
             <span class="order-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" focusable="false">

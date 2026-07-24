@@ -30,7 +30,7 @@ export class OrderDetailPanel implements OnInit, OnDestroy {
     this.closed.emit();
   }
 
-  deleteOrder(): void {
+  async deleteOrder(): Promise<void> {
     const order = this.order;
     if (!order) {
       return;
@@ -43,17 +43,17 @@ export class OrderDetailPanel implements OnInit, OnDestroy {
       return;
     }
 
-    this.orderService.deleteOrder(order.id);
+    await this.orderService.deleteOrder(order.id);
     this.close();
   }
 
-  reopenOrder(): void {
+  async reopenOrder(): Promise<void> {
     const order = this.order;
     if (!order) {
       return;
     }
 
-    this.orderService.reopenOrder(order.id);
+    await this.orderService.reopenOrder(order.id);
     this.close();
   }
 }
