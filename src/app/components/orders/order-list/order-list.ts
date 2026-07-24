@@ -13,7 +13,7 @@ export class OrderList {
   orders: Order[];
 
   constructor(private orderService: OrderService) {
-    this.orders = this.orderService.getOrders();
+    this.orders = this.orderService.getDraftOrders();
   }
 
   createOrder() {

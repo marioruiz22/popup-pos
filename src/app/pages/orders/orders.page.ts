@@ -141,7 +141,7 @@ export class OrdersPage {
   }
 
   private getOrderDate(order: Order): Date {
-    return order.paidAt ?? order.createdAt;
+    return order.completedAt ?? order.createdAt;
   }
 
   private startOfDay(date: Date): Date {

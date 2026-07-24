@@ -1,11 +1,16 @@
-<h2>Orders</h2>
+<ul>
+  @for (order of orders; track order.id) {
+    <li>
+      <button type="button" (click)="selectOrder(order.id)">
+        @if (order.orderNumber != null) {
+          Order #{{ order.orderNumber }}
+        } @else {
+          Draft
+        }
+        ({{ order.items.length }} items)
+      </button>
+    </li>
+  }
+</ul>
 
-<button (click)="createOrder()">+ New Order</button>
-
-<hr />
-
-@for (order of orders; track order.id) {
-  <button (click)="selectOrder(order.id)">
-    Order #{{ order.orderNumber }} ({{ order.items.length }} items)
-  </button>
-}
+<button type="button" (click)="createOrder()">+ New Order</button>

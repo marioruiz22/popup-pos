@@ -84,7 +84,11 @@
 
             <div class="order-cols" [class.has-extras]="hasExtras(order)">
               <span class="order-number">
-                #{{ order.orderNumber }}
+                @if (order.orderNumber != null) {
+                  #{{ order.orderNumber }}
+                } @else {
+                  Draft
+                }
                 @if (order.customerName) {
                   <span class="order-customer-inline">· {{ order.customerName }}</span>
                 }

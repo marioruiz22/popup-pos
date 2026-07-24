@@ -4,7 +4,7 @@
 
 @if (order) {
   <p class="order-meta">
-    <span class="order-number">Order #{{ order.orderNumber }}</span>
+    <span class="order-number">{{ orderHeading }}</span>
     <span class="status-chip">{{ order.status }}</span>
     @if (order.paymentMethod) {
       <span class="status-chip">{{ order.paymentMethod }}</span>
@@ -263,5 +263,5 @@
     }
   </div>
 } @else {
-  <p class="order-empty">No open order. Tap a product to start a new order.</p>
+  <p class="order-empty">No draft order. Tap a product to start a new order.</p>
 }

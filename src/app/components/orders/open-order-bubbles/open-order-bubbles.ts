@@ -44,7 +44,7 @@ export class OpenOrderBubbles implements AfterViewChecked {
   }
 
   get openOrders(): Order[] {
-    return this.orderService.getOpenOrders();
+    return this.orderService.getDraftOrders();
   }
 
   get currentOrderId(): string {
@@ -79,7 +79,13 @@ export class OpenOrderBubbles implements AfterViewChecked {
 
   bubbleLabel(order: Order): string {
     const name = order.customerName?.trim();
-    return name || `#${order.orderNumber}`;
+    if (name) {
+      return name;
+    }
+    if (order.orderNumber != null) {
+      return `#${order.orderNumber}`;
+    }
+    return 'Draft';
   }
 
   private scrollBubbleIntoView(scrollEl: HTMLElement, bubble: HTMLElement): void {

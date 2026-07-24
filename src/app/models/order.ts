@@ -1,21 +1,32 @@
 import { OrderItem } from './order-item';
 
-export type OrderStatus = 'open' | 'paid' | 'cancelled';
+/**
+ * Order lifecycle:
+ * draft (local only) → completed (future Firestore) → reopen → draft (same id) → complete again (update)
+ */
+export type OrderStatus = 'draft' | 'completed' | 'cancelled';
 
 export type PaymentMethod = 'cash' | 'mobile';
 
 export interface Order {
+  /** Internal primary identifier. Always present. Use this in components/services. */
   id: string;
-  orderNumber: number;
+  /**
+   * Display-only order number. Assigned on first completion.
+   * Absent for never-completed drafts. Preserved across reopen → complete again.
+   */
+  orderNumber?: number;
   customerName?: string;
   items: OrderItem[];
   status: OrderStatus;
   createdAt: Date;
-  paidAt?: Date;
+  /** Set when the order is completed (payment taken). */
+  completedAt?: Date;
   discount?: number;
   tip?: number;
   paymentMethod?: PaymentMethod;
   amountReceived?: number;
   changeDue?: number;
+  /** Device that completed the order (from Settings). */
   deviceName?: string;
 }

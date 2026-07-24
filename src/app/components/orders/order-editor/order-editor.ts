@@ -24,6 +24,8 @@ export class OrderEditor implements DoCheck {
   deleteAnyStatus = input(false);
   touchFriendly = input(false);
   completeButtonLabel = input('Complete Order');
+  /** When set, loads that order by UUID (e.g. completed order details). Otherwise uses the current draft. */
+  orderId = input<string | null>(null);
 
   orderCompleted = output<void>();
   orderDeleted = output<void>();
@@ -65,11 +67,26 @@ export class OrderEditor implements DoCheck {
   }
 
   get order(): Order | null {
+    const id = this.orderId();
+    if (id) {
+      return this.orderService.getOrderById(id);
+    }
     return this.orderService.getCurrentOrder();
   }
 
   get isEditable(): boolean {
-    return this.order?.status === 'open';
+    return this.order?.status === 'draft';
+  }
+
+  get orderHeading(): string {
+    const order = this.order;
+    if (!order) {
+      return '';
+    }
+    if (order.orderNumber != null) {
+      return `Order #${order.orderNumber}`;
+    }
+    return 'Draft order';
   }
 
   get itemCount(): number {
@@ -210,7 +227,7 @@ export class OrderEditor implements DoCheck {
       return;
     }
 
-    this.orderService.markPaid({
+    this.orderService.completeOrder({
       paymentMethod: this.paymentMethod,
       amountReceived: this.paymentMethod === 'cash' ? (this.amountReceived ?? undefined) : undefined,
     });
@@ -224,7 +241,9 @@ export class OrderEditor implements DoCheck {
       return;
     }
 
-    const confirmed = confirm(`Delete order #${order.orderNumber}? This cannot be undone.`);
+    const label =
+      order.orderNumber != null ? `order #${order.orderNumber}` : 'this draft order';
+    const confirmed = confirm(`Delete ${label}? This cannot be undone.`);
     if (!confirmed) {
       return;
     }

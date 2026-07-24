@@ -16,13 +16,14 @@
     <div class="detail-body">
       @if (order) {
         <app-order-editor
+          [orderId]="orderId()"
           [showHeading]="false"
           [showCompleteButton]="false"
           [showDeleteButton]="false"
           [touchFriendly]="true"
         />
 
-        @if (order.status === 'paid') {
+        @if (order.status === 'completed') {
           <button type="button" class="reopen-button" (click)="reopenOrder()">
             Reopen Order
           </button>

@@ -16,7 +16,6 @@ export class OrderDetailPanel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     document.body.classList.add('checkout-open');
-    this.orderService.selectOrder(this.orderId());
   }
 
   ngOnDestroy(): void {
@@ -37,7 +36,9 @@ export class OrderDetailPanel implements OnInit, OnDestroy {
       return;
     }
 
-    const confirmed = confirm(`Delete order #${order.orderNumber}? This cannot be undone.`);
+    const label =
+      order.orderNumber != null ? `order #${order.orderNumber}` : 'this order';
+    const confirmed = confirm(`Delete ${label}? This cannot be undone.`);
     if (!confirmed) {
       return;
     }

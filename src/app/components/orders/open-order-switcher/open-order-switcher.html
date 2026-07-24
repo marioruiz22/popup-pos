@@ -1,9 +1,9 @@
 @if (showHeading()) {
-  <h2 class="switcher-heading">Open Orders</h2>
+  <h2 class="switcher-heading">Draft Orders</h2>
 }
 
 @if (openOrders.length === 0) {
-  <p class="switcher-empty">No open orders</p>
+  <p class="switcher-empty">No draft orders</p>
 } @else {
   <div class="switcher-list">
     @for (order of openOrders; track order.id) {

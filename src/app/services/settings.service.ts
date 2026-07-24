@@ -31,6 +31,11 @@ export class SettingsService {
     return this.settings().deviceName;
   }
 
+  /**
+   * Device name is stamped onto completed orders at complete time.
+   * TODO(firebase): Optionally sync settings / device identity with a devices collection.
+   */
+
   getDisplayTitle(): string {
     return this.displayTitle();
   }

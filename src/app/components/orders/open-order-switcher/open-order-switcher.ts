@@ -14,7 +14,7 @@ export class OpenOrderSwitcher {
   constructor(private orderService: OrderService) {}
 
   get openOrders(): Order[] {
-    return this.orderService.getOpenOrders();
+    return this.orderService.getDraftOrders();
   }
 
   get currentOrderId(): string {
@@ -35,6 +35,12 @@ export class OpenOrderSwitcher {
 
   orderLabel(order: Order): string {
     const name = order.customerName?.trim();
-    return name || `#${order.orderNumber}`;
+    if (name) {
+      return name;
+    }
+    if (order.orderNumber != null) {
+      return `#${order.orderNumber}`;
+    }
+    return 'Draft';
   }
 }

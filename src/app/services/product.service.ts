@@ -37,6 +37,10 @@ export interface ProductInput {
   active: boolean;
 }
 
+/**
+ * Product catalog.
+ * Today: localStorage. Later: Firestore is the source of truth.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -44,7 +48,7 @@ export class ProductService {
   private products: Product[] = [];
 
   constructor() {
-    this.load();
+    this.loadProducts();
   }
 
   getProducts(): Product[] {
@@ -66,7 +70,7 @@ export class ProductService {
     }
 
     this.products.push(product);
-    this.save();
+    this.persistProducts();
     return product;
   }
 
@@ -82,7 +86,7 @@ export class ProductService {
     }
 
     this.products[index] = product;
-    this.save();
+    this.persistProducts();
     return product;
   }
 
@@ -93,7 +97,7 @@ export class ProductService {
     }
 
     product.active = active;
-    this.save();
+    this.persistProducts();
   }
 
   deleteProduct(id: string): boolean {
@@ -103,7 +107,7 @@ export class ProductService {
     }
 
     this.products.splice(index, 1);
-    this.save();
+    this.persistProducts();
     return true;
   }
 
@@ -128,7 +132,12 @@ export class ProductService {
     return products.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
   }
 
-  private load(): void {
+  /**
+   * Loads the product catalog into memory.
+   * TODO(firebase): Replace localStorage read with a Firestore products collection
+   * subscription (or one-shot fetch + optional local cache for offline).
+   */
+  private loadProducts(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
 
     if (raw) {
@@ -145,10 +154,15 @@ export class ProductService {
     }
 
     this.products = DEFAULT_PRODUCTS.map((product) => ({ ...product }));
-    this.save();
+    this.persistProducts();
   }
 
-  private save(): void {
+  /**
+   * Persists the in-memory catalog.
+   * TODO(firebase): Write creates/updates/deletes to Firestore instead of (or in
+   * addition to) localStorage. Keep UI calling add/update/delete methods unchanged.
+   */
+  private persistProducts(): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.products));
   }
 }
