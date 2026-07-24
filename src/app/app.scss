@@ -70,8 +70,17 @@
   padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 }
 
+.app-main.join-main {
+  padding: 0;
+  padding-bottom: 0;
+}
+
 @media (min-width: 768px) {
   .app-main {
     padding-bottom: 1rem;
+  }
+
+  .app-main.join-main {
+    padding-bottom: 0;
   }
 }

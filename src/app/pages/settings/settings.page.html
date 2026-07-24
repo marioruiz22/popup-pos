@@ -37,4 +37,22 @@
       <p class="saved-message" role="status">{{ savedMessage }}</p>
     }
   </form>
+
+  <section class="form-card session-card" aria-label="Popup access">
+    <div class="session-copy">
+      <strong>Popup access</strong>
+      @if (joinCode) {
+        <span>Joined with code <span class="join-code">{{ joinCode }}</span></span>
+      } @else {
+        <span>Not joined</span>
+      }
+      <span class="field-hint">
+        Share this join code with trusted devices only.
+      </span>
+    </div>
+
+    <button type="button" class="leave-button" (click)="leavePopup()">
+      Leave popup
+    </button>
+  </section>
 </div>

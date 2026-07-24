@@ -29,4 +29,9 @@ export interface Order {
   changeDue?: number;
   /** Device that completed the order (from Settings). */
   deviceName?: string;
+  /**
+   * Popup this completed order belongs to (from join session).
+   * TODO(firebase): Required for Security Rules and per-popup daily order numbers.
+   */
+  popupId?: string;
 }

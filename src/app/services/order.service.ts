@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Order, PaymentMethod } from '../models/order';
 import { Product } from '../models/product';
+import { PopupSessionService } from './popup-session.service';
 import { SettingsService } from './settings.service';
 
 /** @deprecated Migrated into draft + completed storage keys. */
@@ -51,7 +52,10 @@ export class OrderService {
 
   private currentOrderId = '';
 
-  constructor(private settingsService: SettingsService) {
+  constructor(
+    private settingsService: SettingsService,
+    private popupSessionService: PopupSessionService
+  ) {
     this.load();
   }
 
@@ -162,6 +166,8 @@ export class OrderService {
     order.completedAt = new Date();
     const deviceName = this.settingsService.getDeviceName().trim();
     order.deviceName = deviceName || undefined;
+    const popupId = this.popupSessionService.getPopupId();
+    order.popupId = popupId || undefined;
 
     this.moveDraftToCompleted(order);
     this.selectNextDraftOrder();
@@ -197,6 +203,7 @@ export class OrderService {
     order.changeDue = undefined;
     order.completedAt = undefined;
     order.deviceName = undefined;
+    order.popupId = undefined;
     // Keep order.id and order.orderNumber.
 
     this.draftOrders.push(order);
@@ -550,6 +557,7 @@ export class OrderService {
       amountReceived: order.amountReceived,
       changeDue: order.changeDue,
       deviceName: order.deviceName,
+      popupId: order.popupId,
     };
 
     if (normalized.status === 'draft' && !normalized.completedAt && legacyStatus === 'open') {

@@ -77,3 +77,32 @@
   color: var(--brand-ink);
   font-weight: 600;
 }
+
+.session-card {
+  gap: 1rem;
+}
+
+.session-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.session-copy .field-hint {
+  margin: 0.15rem 0 0;
+}
+
+.join-code {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.leave-button {
+  width: 100%;
+  min-height: 2.85rem;
+  border: 1px solid rgba(176, 0, 32, 0.35);
+  border-radius: 1.1rem;
+  background: #fff;
+  color: #b00020;
+  font-weight: 600;
+  cursor: pointer;
+}

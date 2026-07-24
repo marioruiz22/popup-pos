@@ -1,0 +1,44 @@
+<div class="join-page">
+  <section class="join-card" aria-label="Join popup">
+    <img
+      class="join-icon"
+      src="icons/icon-192x192.png"
+      width="72"
+      height="72"
+      alt=""
+    />
+
+    <h1 class="join-title">Join a popup</h1>
+    <p class="join-subtitle">
+      Enter the join code for your fundraiser to unlock this device.
+    </p>
+
+    <form class="join-form" (ngSubmit)="submit()">
+      <label class="field">
+        Join code
+        <input
+          name="joinCode"
+          [(ngModel)]="joinCode"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          maxlength="32"
+          placeholder="e.g. MANGO4821"
+          [disabled]="submitting"
+        />
+      </label>
+
+      @if (errorMessage) {
+        <p class="join-error" role="alert">{{ errorMessage }}</p>
+      }
+
+      <button type="submit" class="join-button" [disabled]="submitting">
+        {{ submitting ? 'Joining…' : 'Continue' }}
+      </button>
+    </form>
+
+    <p class="join-footnote">
+      Until cloud sync is enabled, this unlocks the app on this device only.
+    </p>
+  </section>
+</div>

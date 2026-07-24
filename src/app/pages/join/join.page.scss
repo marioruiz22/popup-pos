@@ -1,0 +1,93 @@
+.join-page {
+  min-height: calc(100dvh - 2rem);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.join-card {
+  width: min(100%, 24rem);
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  padding: 1.5rem 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.join-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.1rem;
+  object-fit: cover;
+}
+
+.join-title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.join-subtitle {
+  margin: 0;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.join-form {
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+  margin-top: 0.35rem;
+  text-align: left;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 1.1rem;
+  background: #fff;
+  font: inherit;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.join-error {
+  margin: 0;
+  color: #b00020;
+  font-size: 0.95rem;
+}
+
+.join-button {
+  width: 100%;
+  min-height: 3.25rem;
+  border: none;
+  border-radius: 1.1rem;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.join-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.join-footnote {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.65;
+  line-height: 1.35;
+}
