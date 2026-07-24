@@ -12,17 +12,28 @@
         class="switcher-item"
         [class.active]="order.id === currentOrderId"
         (click)="selectOrder(order.id)"
+        [attr.aria-label]="orderLabel(order)"
       >
-        <span class="switcher-primary">
-          <span class="order-number">Order #{{ order.orderNumber }}</span>
-          <span class="customer-name">
-            @if (order.customerName) {
-              {{ order.customerName }}
-            }
-          </span>
+        <span class="switcher-cart" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" focusable="false">
+            <path
+              d="M7 7h13l-1.2 8.5a2 2 0 0 1-2 1.7H9.2a2 2 0 0 1-2-1.6L5.5 4H3"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle cx="10" cy="20" r="1.25" fill="currentColor" />
+            <circle cx="17" cy="20" r="1.25" fill="currentColor" />
+          </svg>
+          @if (getItemCount(order) > 0) {
+            <span class="switcher-count">{{ getItemCount(order) }}</span>
+          }
         </span>
-        <span class="switcher-meta">
-          {{ getItemCount(order) }} items · ${{ getTotal(order).toFixed(2) }}
+
+        <span class="switcher-copy">
+          <span class="switcher-label">{{ orderLabel(order) }}</span>
+          <span class="switcher-total">${{ getTotal(order).toFixed(2) }}</span>
         </span>
       </button>
     }

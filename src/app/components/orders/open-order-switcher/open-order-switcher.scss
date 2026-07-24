@@ -1,5 +1,6 @@
 .switcher-heading {
   margin: 0 0 0.75rem;
+  font-size: 1.15rem;
 }
 
 .switcher-empty {
@@ -13,30 +14,90 @@
 }
 
 .switcher-item {
-  display: grid;
-  gap: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   width: 100%;
-  padding: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.55rem 0.85rem 0.55rem 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   text-align: left;
   cursor: pointer;
+  color: inherit;
 }
 
 .switcher-item.active {
-  font-weight: 600;
+  border-color: #1a56db;
+  background: #1a56db;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.28);
 }
 
-.switcher-primary {
+.switcher-cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.switcher-item.active .switcher-cart {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.switcher-cart svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.switcher-count {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.35rem;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.05rem;
+  text-align: center;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+.switcher-item.active .switcher-count {
+  background: #eff6ff;
+  color: #1a56db;
+  box-shadow: 0 0 0 1.5px #1a56db;
+}
+
+.switcher-copy {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.05rem;
+  min-width: 0;
+  flex: 1;
 }
 
-.customer-name {
-  min-height: 1.1rem;
-  font-size: 0.9rem;
-  opacity: 0.85;
+.switcher-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.switcher-meta {
-  font-size: 0.9rem;
-  opacity: 0.75;
+.switcher-total {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
 }

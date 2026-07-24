@@ -32,4 +32,9 @@ export class OpenOrderSwitcher {
   getTotal(order: Order): number {
     return this.orderService.getTotal(order);
   }
+
+  orderLabel(order: Order): string {
+    const name = order.customerName?.trim();
+    return name || `#${order.orderNumber}`;
+  }
 }

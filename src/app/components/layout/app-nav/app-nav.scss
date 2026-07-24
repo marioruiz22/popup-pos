@@ -41,6 +41,15 @@
   flex-wrap: wrap;
 }
 
+:host(.nav-desktop) .nav-link {
+  border-radius: 1.1rem;
+  padding: 0.55rem 0.9rem;
+}
+
+:host(.nav-desktop) .nav-link.active {
+  background: #eff6ff;
+}
+
 :host(.nav-mobile) {
   position: fixed;
   left: 0;

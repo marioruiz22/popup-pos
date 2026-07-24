@@ -17,10 +17,6 @@ export class PosPage {
 
   constructor(private orderService: OrderService) {}
 
-  get hasOpenOrders(): boolean {
-    return this.orderService.getOpenOrders().length > 0;
-  }
-
   createOrder(): void {
     this.orderService.createOrder();
   }

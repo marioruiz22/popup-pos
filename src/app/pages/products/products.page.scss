@@ -2,6 +2,14 @@
   display: grid;
   gap: 1rem;
   max-width: 44rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .products-page {
+    max-width: 52rem;
+  }
 }
 
 .page-header {

@@ -1,12 +1,15 @@
 <div class="pos-page">
   <aside class="pos-sidebar pos-desktop-only">
-    <app-open-order-switcher />
+    <div class="sidebar-card">
+      <app-open-order-switcher />
 
-    @if (hasOpenOrders) {
-      <button type="button" class="action-button" (click)="createOrder()">
-        New Order
+      <button type="button" class="new-order-button" (click)="createOrder()" aria-label="New order">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>New Order</span>
       </button>
-    }
+    </div>
   </aside>
 
   <section class="pos-products">
@@ -14,7 +17,9 @@
   </section>
 
   <aside class="pos-order pos-desktop-only">
-    <app-order-editor [showDeleteButton]="true" />
+    <div class="order-panel-card">
+      <app-order-editor [showDeleteButton]="true" />
+    </div>
   </aside>
 
   <app-open-order-bubbles (openCart)="openCart()" />
