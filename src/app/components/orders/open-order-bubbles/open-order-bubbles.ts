@@ -12,7 +12,7 @@ export class OpenOrderBubbles implements AfterViewChecked {
   openCart = output<void>();
 
   private readonly bubblesScroll = viewChild<ElementRef<HTMLElement>>('bubblesScroll');
-  private shouldScrollToEnd = true;
+  private shouldScrollToActive = true;
   private lastOrderCount = 0;
 
   constructor(private orderService: OrderService) {}
@@ -22,18 +22,25 @@ export class OpenOrderBubbles implements AfterViewChecked {
 
     if (orderCount !== this.lastOrderCount) {
       this.lastOrderCount = orderCount;
-      this.shouldScrollToEnd = true;
+      this.shouldScrollToActive = true;
     }
 
-    if (!this.shouldScrollToEnd) {
+    if (!this.shouldScrollToActive) {
       return;
     }
 
-    const el = this.bubblesScroll()?.nativeElement;
-    if (el) {
-      el.scrollLeft = el.scrollWidth;
-      this.shouldScrollToEnd = false;
+    const scrollEl = this.bubblesScroll()?.nativeElement;
+    if (!scrollEl) {
+      return;
     }
+
+    const activeBubble = scrollEl.querySelector<HTMLElement>('.order-bubble.active');
+    if (!activeBubble) {
+      return;
+    }
+
+    this.scrollBubbleIntoView(scrollEl, activeBubble);
+    this.shouldScrollToActive = false;
   }
 
   get openOrders(): Order[] {
@@ -59,7 +66,7 @@ export class OpenOrderBubbles implements AfterViewChecked {
 
   createOrder(): void {
     this.orderService.createOrder();
-    this.shouldScrollToEnd = true;
+    this.shouldScrollToActive = true;
   }
 
   getItemCount(order: Order): number {
@@ -68,5 +75,19 @@ export class OpenOrderBubbles implements AfterViewChecked {
 
   getTotal(order: Order): number {
     return this.orderService.getTotal(order);
+  }
+
+  bubbleLabel(order: Order): string {
+    const name = order.customerName?.trim();
+    return name || `#${order.orderNumber}`;
+  }
+
+  private scrollBubbleIntoView(scrollEl: HTMLElement, bubble: HTMLElement): void {
+    const scrollRect = scrollEl.getBoundingClientRect();
+    const bubbleRect = bubble.getBoundingClientRect();
+    const delta =
+      bubbleRect.left - scrollRect.left - (scrollRect.width - bubbleRect.width) / 2;
+
+    scrollEl.scrollLeft += delta;
   }
 }

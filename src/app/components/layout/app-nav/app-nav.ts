@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+type NavIcon = 'products' | 'sell' | 'sales';
+
 interface NavItem {
   path: string;
   label: string;
+  icon: NavIcon;
 }
 
 @Component({
@@ -14,8 +17,8 @@ interface NavItem {
 })
 export class AppNav {
   readonly navItems: NavItem[] = [
-    { path: '/pos', label: 'POS' },
-    { path: '/orders', label: 'Sales' },
-    { path: '/products', label: 'Products' },
+    { path: '/products', label: 'Products', icon: 'products' },
+    { path: '/pos', label: 'Sell', icon: 'sell' },
+    { path: '/orders', label: 'Sales', icon: 'sales' },
   ];
 }
