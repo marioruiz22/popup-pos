@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Order, PaymentMethod } from '../models/order';
 import { Product } from '../models/product';
+import { SettingsService } from './settings.service';
 
 const STORAGE_KEY = 'popup-pos-orders';
 
@@ -25,7 +26,7 @@ export class OrderService {
 
   private currentOrderId = '';
 
-  constructor() {
+  constructor(private settingsService: SettingsService) {
     this.load();
   }
 
@@ -117,6 +118,8 @@ export class OrderService {
 
     order.status = 'paid';
     order.paidAt = new Date();
+    const deviceName = this.settingsService.getDeviceName().trim();
+    order.deviceName = deviceName || undefined;
     this.selectNextOpenOrder();
     this.save();
   }
@@ -130,6 +133,7 @@ export class OrderService {
       order.amountReceived = undefined;
       order.changeDue = undefined;
       order.paidAt = undefined;
+      order.deviceName = undefined;
       this.currentOrderId = id;
       this.save();
     }

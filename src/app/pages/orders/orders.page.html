@@ -105,6 +105,9 @@
 
               <span class="order-meta-line">
                 {{ paymentLabel(order) }} · {{ getItemCount(order) }} items
+                @if (order.deviceName) {
+                  · {{ order.deviceName }}
+                }
               </span>
               <span class="order-date">{{ formatDate(order) }}</span>
             </div>

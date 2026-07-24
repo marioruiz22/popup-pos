@@ -9,6 +9,9 @@
     @if (order.paymentMethod) {
       <span class="status-chip">{{ order.paymentMethod }}</span>
     }
+    @if (order.deviceName) {
+      <span class="status-chip">{{ order.deviceName }}</span>
+    }
   </p>
 
   <section class="customer-card" aria-label="Customer">

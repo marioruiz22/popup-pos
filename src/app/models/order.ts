@@ -17,4 +17,5 @@ export interface Order {
   paymentMethod?: PaymentMethod;
   amountReceived?: number;
   changeDue?: number;
+  deviceName?: string;
 }
