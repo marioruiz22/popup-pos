@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Product } from '../../models/product';
 import { ProductService } from '../../services/product.service';
 import { ProductEditorPanel } from '../../components/products/product-editor-panel/product-editor-panel';
@@ -11,16 +11,14 @@ import { nameInitial } from '../../utils/image.util';
   styleUrl: './products.page.scss',
 })
 export class ProductsPage {
+  private readonly productService = inject(ProductService);
+
   readonly productInitial = nameInitial;
+  readonly products = this.productService.allProducts;
+  readonly loadError = this.productService.lastError;
 
   editorOpen = false;
   editingProductId: string | null = null;
-
-  constructor(private productService: ProductService) {}
-
-  get products(): Product[] {
-    return this.productService.getAllProducts();
-  }
 
   openNewProduct(): void {
     this.editingProductId = null;

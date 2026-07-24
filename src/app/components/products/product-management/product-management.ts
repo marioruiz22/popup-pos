@@ -34,16 +34,16 @@ export class ProductManagement {
     return Boolean(this.form.imageUrl?.trim());
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.editingId) {
-      const updated = this.productService.updateProduct(this.editingId, this.form);
+      const updated = await this.productService.updateProduct(this.editingId, this.form);
       if (updated) {
         this.resetForm();
       }
       return;
     }
 
-    const created = this.productService.addProduct(this.form);
+    const created = await this.productService.addProduct(this.form);
     if (created) {
       this.resetForm();
     }
@@ -64,11 +64,12 @@ export class ProductManagement {
     this.resetForm();
   }
 
-  toggleActive(product: Product): void {
-    this.productService.setProductActive(product.id, !product.active);
+  async toggleActive(product: Product): Promise<void> {
+    await this.productService.setProductActive(product.id, !product.active);
 
     if (this.editingId === product.id) {
-      this.form.active = product.active;
+      const refreshed = this.productService.getProductById(product.id);
+      this.form.active = refreshed?.active ?? product.active;
     }
   }
 

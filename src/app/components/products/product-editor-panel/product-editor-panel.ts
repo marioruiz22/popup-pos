@@ -53,7 +53,7 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
     this.closed.emit();
   }
 
-  deleteProduct(): void {
+  async deleteProduct(): Promise<void> {
     const productId = this.productId();
     if (!productId) {
       return;
@@ -69,21 +69,21 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.productService.deleteProduct(productId)) {
+    if (await this.productService.deleteProduct(productId)) {
       this.deleted.emit();
       this.close();
     }
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.imageProcessing) {
       return;
     }
 
     const productId = this.productId();
     const result = productId
-      ? this.productService.updateProduct(productId, this.form)
-      : this.productService.addProduct(this.form);
+      ? await this.productService.updateProduct(productId, this.form)
+      : await this.productService.addProduct(this.form);
 
     if (result) {
       this.saved.emit();

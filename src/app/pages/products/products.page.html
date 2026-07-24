@@ -13,14 +13,18 @@
 
   <section class="products-card" aria-label="Products">
     <header class="products-card-header">
-      {{ products.length }} {{ products.length === 1 ? 'product' : 'products' }}
+      {{ products().length }} {{ products().length === 1 ? 'product' : 'products' }}
     </header>
 
-    @if (products.length === 0) {
+    @if (loadError()) {
+      <p class="section-empty padded products-error">{{ loadError() }}</p>
+    }
+
+    @if (products().length === 0) {
       <p class="section-empty padded">No products yet. Tap + to create one.</p>
     } @else {
       <div class="products-list">
-        @for (product of products; track product.id) {
+        @for (product of products(); track product.id) {
           <button
             type="button"
             class="product-row"

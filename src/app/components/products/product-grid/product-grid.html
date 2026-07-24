@@ -1,5 +1,5 @@
 <div class="product-grid">
-  @for (product of products; track product.id) {
+  @for (product of products(); track product.id) {
     <button class="product-button" (click)="addProduct(product)">
       @if (product.imageUrl) {
         <img [src]="product.imageUrl" [alt]="product.name" class="product-image" />

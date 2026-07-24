@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ProductService } from '../../../services/product.service';
 import { Product } from '../../../models/product';
 import { OrderService } from '../../../services/order.service';
@@ -8,21 +8,16 @@ import { nameInitial } from '../../../utils/image.util';
   selector: 'app-product-grid',
   imports: [],
   templateUrl: './product-grid.html',
-  styleUrl: './product-grid.scss'
+  styleUrl: './product-grid.scss',
 })
 export class ProductGrid {
+  private readonly productService = inject(ProductService);
+  private readonly orderService = inject(OrderService);
+
   readonly nameInitial = nameInitial;
+  readonly products = this.productService.activeProducts;
 
-  constructor(
-    private productService: ProductService,
-    private orderService: OrderService
-  ) {}
-
-  get products(): Product[] {
-    return this.productService.getProducts();
-  }
-
-  addProduct(product: Product) {
+  addProduct(product: Product): void {
     this.orderService.addProduct(product);
   }
 }
