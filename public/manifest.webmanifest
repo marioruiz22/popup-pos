@@ -1,7 +1,7 @@
 {
   "name": "Popup POS",
-  "short_name": "Sell",
-  "theme_color": "#1a56db",
+  "short_name": "Popup POS",
+  "theme_color": "#a78bfa",
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "./",
