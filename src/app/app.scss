@@ -13,6 +13,21 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.app-brand-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
 .app-title {
   margin: 0;
   font-size: 1.25rem;
