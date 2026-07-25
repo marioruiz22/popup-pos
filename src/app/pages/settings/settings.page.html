@@ -56,4 +56,30 @@
       Leave popup
     </button>
   </section>
+
+  <section class="form-card version-card" aria-label="App version">
+    <div class="session-copy">
+      <strong>App version</strong>
+      <span class="version-value">{{ appUpdate.versionLabel() }}</span>
+      <span class="field-hint">Built {{ appUpdate.builtAtLabel() }}</span>
+      @if (appUpdate.statusMessage(); as status) {
+        <span class="update-status" role="status">{{ status }}</span>
+      }
+    </div>
+
+    @if (appUpdate.updateAvailable()) {
+      <button type="button" class="update-button" (click)="installUpdate()">
+        Reload to update
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="check-update-button"
+        (click)="checkForUpdate()"
+        [disabled]="appUpdate.isChecking()"
+      >
+        {{ appUpdate.isChecking() ? 'Checking…' : 'Check for updates' }}
+      </button>
+    }
+  </section>
 </div>

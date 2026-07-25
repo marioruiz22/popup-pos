@@ -106,3 +106,45 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.version-card {
+  gap: 1rem;
+}
+
+.version-value {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.update-status {
+  margin-top: 0.15rem;
+  color: var(--brand-ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.check-update-button,
+.update-button {
+  width: 100%;
+  min-height: 2.85rem;
+  border-radius: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check-update-button {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: inherit;
+}
+
+.check-update-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.update-button {
+  border: none;
+  background: var(--brand);
+  color: #fff;
+}

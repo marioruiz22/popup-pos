@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AppUpdateService } from '../../services/app-update.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PopupSessionService } from '../../services/popup-session.service';
 import { SettingsService } from '../../services/settings.service';
@@ -16,6 +17,7 @@ export class SettingsPage {
   private readonly popupSession = inject(PopupSessionService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly router = inject(Router);
+  readonly appUpdate = inject(AppUpdateService);
 
   popupName = '';
   deviceName = '';
@@ -62,5 +64,13 @@ export class SettingsPage {
 
     this.popupSession.leavePopup();
     void this.router.navigateByUrl('/join');
+  }
+
+  async checkForUpdate(): Promise<void> {
+    await this.appUpdate.checkForUpdate();
+  }
+
+  async installUpdate(): Promise<void> {
+    await this.appUpdate.installUpdate();
   }
 }
