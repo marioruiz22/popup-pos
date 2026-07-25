@@ -36,8 +36,10 @@
 
   .order-panel-card {
     position: sticky;
+    // Header (~4.8rem) + main top/bottom padding (2rem); keep a little slack
+    // so the panel never forces a page-level scrollbar.
     top: 1rem;
-    max-height: calc(100vh - 6rem);
+    max-height: calc(100dvh - 7.25rem);
     overflow-y: auto;
   }
 
