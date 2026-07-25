@@ -27,7 +27,7 @@
   border: none;
   border-radius: 0;
   padding: 0;
-  color: #b00020;
+  color: var(--danger);
   background: transparent;
   display: inline-flex;
   align-items: center;
@@ -60,7 +60,7 @@
   align-items: center;
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--fill);
   text-transform: capitalize;
   font-size: 0.95rem;
   font-weight: 600;
@@ -71,9 +71,9 @@
 .totals-card,
 .payment-section {
   margin-bottom: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   border-radius: 1.1rem;
-  background: #fff;
+  background: var(--surface);
   overflow: hidden;
 }
 
@@ -112,9 +112,9 @@
   width: 100%;
   min-height: 2.75rem;
   padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   border-radius: 1.1rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .customer-field input:disabled {
@@ -124,7 +124,7 @@
 
 .items-card-header {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -142,7 +142,7 @@
 }
 
 .order-item + .order-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .item-thumb {
@@ -151,7 +151,7 @@
   object-fit: cover;
   border-radius: 0.95rem;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--fill-soft);
 }
 
 .item-thumb.placeholder {
@@ -188,7 +188,7 @@
   gap: 0.15rem;
   padding: 0.15rem;
   border-radius: 1.1rem;
-  background: #f1f3f5;
+  background: var(--surface-subtle);
   width: fit-content;
 }
 
@@ -222,11 +222,11 @@
 }
 
 .qty-button:active {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--fill);
 }
 
 .remove-button {
-  color: #b00020;
+  color: var(--danger);
   background: transparent;
 }
 
@@ -265,9 +265,9 @@
   gap: 0.15rem;
   min-height: 2.5rem;
   padding: 0 0.25rem 0 0.65rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .money-input.disabled {
@@ -275,7 +275,7 @@
 }
 
 .money-prefix {
-  color: rgba(0, 0, 0, 0.55);
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -296,7 +296,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--text-muted);
   font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
@@ -308,14 +308,14 @@
 }
 
 .money-clear:not(:disabled):hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.75);
+  background: var(--fill);
+  color: var(--text-soft);
 }
 
 .totals-grand {
   margin: 0.75rem 0 0;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border);
   font-size: 1.05rem;
 }
 
@@ -327,7 +327,7 @@
   min-height: 2.75rem;
   padding: 0.75rem 1rem;
   border-radius: 1.1rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   cursor: pointer;
 }
 
@@ -335,7 +335,7 @@
   width: 100%;
   border: none;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   font-weight: 600;
 }
 
@@ -369,9 +369,9 @@
 .payment-method {
   min-height: 3.25rem;
   padding: 0.85rem 0.75rem;
-  border: 2px solid rgba(0, 0, 0, 0.12);
+  border: 2px solid var(--border);
   border-radius: 1.1rem;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -392,8 +392,8 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.85rem;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
-  color: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(135deg, var(--fill-soft), var(--fill));
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -427,17 +427,17 @@
 }
 
 .money-input.invalid {
-  border-color: #dc2626;
+  border-color: var(--danger-strong);
 }
 
 .money-input.invalid .money-prefix,
 .money-input.invalid .money-clear {
-  color: #b91c1c;
+  color: var(--danger-text);
 }
 
 .cash-hint {
   margin: 0;
-  color: #b91c1c;
+  color: var(--danger-text);
   font-size: 0.9rem;
 }
 
@@ -450,9 +450,9 @@
 
 .quick-amount {
   min-height: 2.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
 }
 

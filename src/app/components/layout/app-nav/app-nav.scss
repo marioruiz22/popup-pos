@@ -33,7 +33,7 @@
 
 .nav-link.active {
   font-weight: 600;
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--fill);
   color: var(--brand);
 }
 
@@ -56,8 +56,8 @@
   right: 0;
   bottom: 0;
   z-index: 10;
-  background: #fff;
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 

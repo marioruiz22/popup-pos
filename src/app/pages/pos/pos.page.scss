@@ -28,10 +28,10 @@
     display: grid;
     gap: 0.85rem;
     padding: 1rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
     border-radius: 1.25rem;
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    background: var(--surface);
+    box-shadow: 0 2px 10px var(--shadow-soft);
   }
 
   .order-panel-card {
@@ -54,7 +54,7 @@
     border: none;
     border-radius: 1.1rem;
     background: var(--brand);
-    color: #fff;
+    color: var(--on-brand);
     font-weight: 600;
     cursor: pointer;
   }

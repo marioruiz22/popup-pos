@@ -7,15 +7,15 @@
   justify-content: center;
   padding: 1rem;
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--overlay);
 }
 
 .confirm-panel {
   width: min(100%, 24rem);
   padding: 1.25rem 1.25rem 1.15rem;
   border-radius: 1.25rem;
-  background: #fff;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  background: var(--surface);
+  box-shadow: 0 12px 40px var(--shadow);
 }
 
 .confirm-title {
@@ -27,7 +27,7 @@
 
 .confirm-message {
   margin: 0 0 1.25rem;
-  color: rgba(0, 0, 0, 0.68);
+  color: var(--text-muted);
   font-size: 0.98rem;
   line-height: 1.45;
 }
@@ -47,18 +47,18 @@
 }
 
 .confirm-button.cancel {
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.8);
+  background: var(--fill);
+  color: var(--text-soft);
 }
 
 .confirm-button.primary {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
 }
 
 .confirm-button.danger {
-  background: #dc2626;
-  color: #fff;
+  background: var(--danger-strong);
+  color: var(--on-brand);
 }
 
 @media (min-width: 900px) {

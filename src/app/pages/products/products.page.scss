@@ -36,7 +36,7 @@
   border: none;
   border-radius: 1.1rem;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -50,15 +50,15 @@
 }
 
 .products-card {
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   border-radius: 1.1rem;
-  background: #fff;
+  background: var(--surface);
   overflow: hidden;
 }
 
 .products-card-header {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
   font-weight: 600;
 }
 
@@ -74,8 +74,8 @@
   width: 100%;
   padding: 0.95rem 1rem;
   border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface);
   text-align: left;
   cursor: pointer;
 }
@@ -93,8 +93,8 @@
   height: 3.25rem;
   object-fit: cover;
   border-radius: 0.95rem;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-subtle);
+  background: var(--fill-soft);
   flex-shrink: 0;
 }
 
@@ -131,13 +131,13 @@
 }
 
 .status-pill.active {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-pill.inactive-pill {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
 }
 
 .product-price {
@@ -157,6 +157,6 @@
 }
 
 .products-error {
-  color: #b00020;
+  color: var(--danger);
   opacity: 1;
 }

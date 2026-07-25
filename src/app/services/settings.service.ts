@@ -6,6 +6,7 @@ const DEFAULT_TITLE = 'Popup POS';
 export interface AppSettings {
   popupName: string;
   deviceName: string;
+  darkMode: boolean;
 }
 
 @Injectable({
@@ -15,12 +16,15 @@ export class SettingsService {
   private readonly settings = signal<AppSettings>({
     popupName: '',
     deviceName: '',
+    darkMode: false,
   });
 
   readonly displayTitle = computed(() => this.settings().popupName.trim() || DEFAULT_TITLE);
+  readonly darkMode = computed(() => this.settings().darkMode);
 
   constructor() {
     this.load();
+    this.applyTheme(this.settings().darkMode);
   }
 
   getPopupName(): string {
@@ -29,6 +33,10 @@ export class SettingsService {
 
   getDeviceName(): string {
     return this.settings().deviceName;
+  }
+
+  isDarkMode(): boolean {
+    return this.settings().darkMode;
   }
 
   /**
@@ -44,13 +52,41 @@ export class SettingsService {
     return DEFAULT_TITLE;
   }
 
+  setDarkMode(enabled: boolean): void {
+    const current = this.settings();
+    if (current.darkMode === enabled) {
+      return;
+    }
+
+    this.settings.set({ ...current, darkMode: enabled });
+    this.applyTheme(enabled);
+    this.save();
+  }
+
   updateSettings(input: Partial<AppSettings>): void {
     const current = this.settings();
-    this.settings.set({
+    const next: AppSettings = {
       popupName: input.popupName !== undefined ? input.popupName.trim() : current.popupName,
       deviceName: input.deviceName !== undefined ? input.deviceName.trim() : current.deviceName,
-    });
+      darkMode: input.darkMode !== undefined ? input.darkMode : current.darkMode,
+    };
+    this.settings.set(next);
+    this.applyTheme(next.darkMode);
     this.save();
+  }
+
+  private applyTheme(darkMode: boolean): void {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      root.removeAttribute('data-theme');
+    }
+
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) {
+      themeColor.setAttribute('content', darkMode ? '#0f0f12' : '#8b5cf6');
+    }
   }
 
   private load(): void {
@@ -64,6 +100,7 @@ export class SettingsService {
       this.settings.set({
         popupName: typeof data.popupName === 'string' ? data.popupName.trim() : '',
         deviceName: typeof data.deviceName === 'string' ? data.deviceName.trim() : '',
+        darkMode: data.darkMode === true,
       });
     } catch {
       // Keep defaults when stored data is invalid.

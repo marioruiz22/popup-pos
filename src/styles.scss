@@ -1,6 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
+  color-scheme: light;
+
   --brand: #8b5cf6;
   --brand-ink: #5b21b6;
   --brand-soft: #f5f3ff;
@@ -8,6 +10,78 @@
   --brand-glow: rgba(139, 92, 246, 0.35);
   --brand-glow-soft: rgba(139, 92, 246, 0.28);
   --brand-dash: rgba(139, 92, 246, 0.45);
+
+  --text: #111111;
+  --text-muted: rgba(0, 0, 0, 0.55);
+  --text-soft: rgba(0, 0, 0, 0.75);
+
+  --page: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f4f5f7;
+  --surface-subtle: #f1f3f5;
+
+  --border: rgba(0, 0, 0, 0.12);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --fill: rgba(0, 0, 0, 0.06);
+  --fill-soft: rgba(0, 0, 0, 0.04);
+
+  --shadow: rgba(0, 0, 0, 0.12);
+  --shadow-soft: rgba(0, 0, 0, 0.06);
+  --overlay: rgba(0, 0, 0, 0.45);
+  --ring-contrast: #ffffff;
+
+  --danger: #b00020;
+  --danger-strong: #dc2626;
+  --danger-text: #b91c1c;
+  --danger-border: rgba(176, 0, 32, 0.35);
+
+  --on-brand: #ffffff;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --neutral-bg: #f3f4f6;
+  --neutral-text: #4b5563;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --brand: #a78bfa;
+  --brand-ink: #c4b5fd;
+  --brand-soft: rgba(167, 139, 250, 0.18);
+  --brand-muted: rgba(167, 139, 250, 0.28);
+  --brand-glow: rgba(167, 139, 250, 0.4);
+  --brand-glow-soft: rgba(167, 139, 250, 0.28);
+  --brand-dash: rgba(167, 139, 250, 0.5);
+
+  --text: #f3f4f6;
+  --text-muted: rgba(243, 244, 246, 0.58);
+  --text-soft: rgba(243, 244, 246, 0.78);
+
+  --page: #0f0f12;
+  --surface: #1c1c21;
+  --surface-muted: #141418;
+  --surface-subtle: #26262c;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --fill: rgba(255, 255, 255, 0.08);
+  --fill-soft: rgba(255, 255, 255, 0.05);
+
+  --shadow: rgba(0, 0, 0, 0.45);
+  --shadow-soft: rgba(0, 0, 0, 0.28);
+  --overlay: rgba(0, 0, 0, 0.62);
+  --ring-contrast: #1c1c21;
+
+  --danger: #f87171;
+  --danger-strong: #ef4444;
+  --danger-text: #fca5a5;
+  --danger-border: rgba(248, 113, 113, 0.4);
+
+  --on-brand: #ffffff;
+  --success-bg: rgba(22, 101, 52, 0.35);
+  --success-text: #86efac;
+  --neutral-bg: rgba(255, 255, 255, 0.08);
+  --neutral-text: rgba(243, 244, 246, 0.7);
 }
 
 *,
@@ -24,7 +98,8 @@ html {
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #111;
+  color: var(--text);
+  background: var(--page);
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

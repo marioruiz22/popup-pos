@@ -29,6 +29,23 @@
         />
       </label>
       <p class="field-hint">Added to orders completed on this device.</p>
+
+      <div class="theme-row">
+        <div class="theme-copy">
+          <strong>Dark mode</strong>
+          <span class="field-hint">Use a darker look for low-light selling.</span>
+        </div>
+        <label class="theme-toggle">
+          <input
+            type="checkbox"
+            name="darkMode"
+            [(ngModel)]="darkMode"
+            [ngModelOptions]="{ standalone: true }"
+          />
+          <span class="theme-toggle-ui" aria-hidden="true"></span>
+          <span class="visually-hidden">{{ darkMode ? 'Disable' : 'Enable' }} dark mode</span>
+        </label>
+      </div>
     </section>
 
     <button type="submit" class="save-button">Save Settings</button>

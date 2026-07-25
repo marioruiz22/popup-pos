@@ -12,8 +12,8 @@
   font-size: 1rem;
   cursor: pointer;
   border-radius: 1.1rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--surface);
   text-align: left;
 }
 
@@ -22,7 +22,7 @@
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 0.85rem;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--fill-soft);
 }
 
 .product-image.placeholder {

@@ -40,6 +40,14 @@ export class SettingsPage {
     return this.popupSession.getPopupName();
   }
 
+  get darkMode(): boolean {
+    return this.settingsService.isDarkMode();
+  }
+
+  set darkMode(enabled: boolean) {
+    this.settingsService.setDarkMode(enabled);
+  }
+
   save(): void {
     this.settingsService.updateSettings({
       popupName: this.popupName,
