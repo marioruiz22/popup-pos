@@ -12,7 +12,7 @@
         class="switcher-item"
         [class.active]="order.id === currentOrderId"
         (click)="selectOrder(order.id)"
-        [attr.aria-label]="orderLabel(order)"
+        [attr.aria-label]="orderAriaLabel(order)"
       >
         <span class="switcher-cart" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -32,7 +32,13 @@
         </span>
 
         <span class="switcher-copy">
-          <span class="switcher-label">{{ orderLabel(order) }}</span>
+          @if (orderLabel(order); as label) {
+            <span class="switcher-label">{{ label }}</span>
+          } @else if (showTabChip(order)) {
+            <span class="switcher-tab" [style.--tab-accent]="tabAccent(order)">
+              {{ order.tabLetter }}
+            </span>
+          }
           <span class="switcher-total">${{ getTotal(order).toFixed(2) }}</span>
         </span>
       </button>

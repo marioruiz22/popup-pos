@@ -8,7 +8,7 @@
             class="order-bubble"
             [class.active]="order.id === currentOrderId"
             (click)="onOrderClick(order.id)"
-            [attr.aria-label]="bubbleLabel(order)"
+            [attr.aria-label]="bubbleAriaLabel(order)"
           >
             <span class="bubble-cart" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -28,7 +28,13 @@
             </span>
 
             <span class="bubble-copy">
-              <span class="bubble-label">{{ bubbleLabel(order) }}</span>
+              @if (bubbleLabel(order); as label) {
+                <span class="bubble-label">{{ label }}</span>
+              } @else if (showTabChip(order)) {
+                <span class="bubble-tab" [style.--tab-accent]="tabAccent(order)">
+                  {{ order.tabLetter }}
+                </span>
+              }
               <span class="bubble-total">${{ getTotal(order).toFixed(2) }}</span>
             </span>
           </button>

@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
+import { accentColorForTabLetter } from '../../../utils/order-accent.util';
 
 @Component({
   selector: 'app-open-order-switcher',
@@ -41,6 +42,26 @@ export class OpenOrderSwitcher {
     if (order.orderNumber != null) {
       return `#${order.orderNumber}`;
     }
-    return 'Draft';
+    return '';
+  }
+
+  showTabChip(order: Order): boolean {
+    return !this.orderLabel(order) && Boolean(order.tabLetter);
+  }
+
+  tabAccent(order: Order): string {
+    return accentColorForTabLetter(order.tabLetter ?? 'A');
+  }
+
+  orderAriaLabel(order: Order): string {
+    const label = this.orderLabel(order);
+    if (label) {
+      return label;
+    }
+    if (order.tabLetter) {
+      return `Tab ${order.tabLetter}`;
+    }
+    const count = this.getItemCount(order);
+    return count > 0 ? `Open order, ${count} items` : 'Open order';
   }
 }

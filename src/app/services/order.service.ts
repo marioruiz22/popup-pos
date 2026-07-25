@@ -228,6 +228,7 @@ export class OrderService {
     order.completedAt = completedAt;
     order.deviceName = deviceName;
     order.popupId = popupId;
+    order.tabLetter = undefined;
 
     this.moveDraftToCompletedLocal(order);
     this.selectNextDraftOrder();
@@ -268,6 +269,7 @@ export class OrderService {
     order.completedAt = undefined;
     order.deviceName = undefined;
     order.popupId = undefined;
+    order.tabLetter = this.nextTabLetter();
     // Keep order.id and order.orderNumber.
 
     this.draftOrders.push(order);
@@ -557,7 +559,27 @@ export class OrderService {
       items: [],
       status: 'draft',
       createdAt: new Date(),
+      tabLetter: this.nextTabLetter(),
     };
+  }
+
+  /** Lowest free letter among current drafts (A freed when that draft completes/deletes). */
+  private nextTabLetter(): string {
+    const used = new Set(
+      this.draftOrders
+        .filter((order) => order.status === 'draft')
+        .map((order) => order.tabLetter?.trim().toUpperCase())
+        .filter((letter): letter is string => Boolean(letter))
+    );
+
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i);
+      if (!used.has(letter)) {
+        return letter;
+      }
+    }
+
+    return 'A';
   }
 
   private assignLocalOrderNumber(): number {
@@ -642,6 +664,7 @@ export class OrderService {
 
     const draftStore = this.readDraftStore();
     this.draftOrders = draftStore.orders.map((order) => this.normalizeOrder(order));
+    this.ensureDraftTabLetters();
     this.currentOrderId =
       this.draftOrders.find((order) => order.id === draftStore.currentOrderId && order.status === 'draft')
         ?.id ?? '';
@@ -650,6 +673,19 @@ export class OrderService {
 
     // Completed orders are loaded from Firestore for the active popup.
     localStorage.removeItem(COMPLETED_STORAGE_KEY);
+  }
+
+  private ensureDraftTabLetters(): void {
+    for (const order of this.draftOrders) {
+      if (order.status !== 'draft') {
+        continue;
+      }
+      if (order.tabLetter?.trim()) {
+        order.tabLetter = order.tabLetter.trim().toUpperCase();
+        continue;
+      }
+      order.tabLetter = this.nextTabLetter();
+    }
   }
 
   private migrateLegacyOrdersIfNeeded(): void {
@@ -737,6 +773,10 @@ export class OrderService {
       changeDue: order.changeDue,
       deviceName: order.deviceName,
       popupId: order.popupId,
+      tabLetter:
+        typeof order.tabLetter === 'string' && /^[A-Za-z]$/.test(order.tabLetter.trim())
+          ? order.tabLetter.trim().toUpperCase()
+          : undefined,
     };
 
     if (normalized.status === 'draft' && !normalized.completedAt && legacyStatus === 'open') {

@@ -1,6 +1,7 @@
 import { AfterViewChecked, Component, ElementRef, output, viewChild } from '@angular/core';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
+import { accentColorForTabLetter } from '../../../utils/order-accent.util';
 
 @Component({
   selector: 'app-open-order-bubbles',
@@ -77,6 +78,7 @@ export class OpenOrderBubbles implements AfterViewChecked {
     return this.orderService.getTotal(order);
   }
 
+  /** Name or reopened #; otherwise the sticky tab letter chip is shown. */
   bubbleLabel(order: Order): string {
     const name = order.customerName?.trim();
     if (name) {
@@ -85,7 +87,27 @@ export class OpenOrderBubbles implements AfterViewChecked {
     if (order.orderNumber != null) {
       return `#${order.orderNumber}`;
     }
-    return 'Draft';
+    return '';
+  }
+
+  showTabChip(order: Order): boolean {
+    return !this.bubbleLabel(order) && Boolean(order.tabLetter);
+  }
+
+  tabAccent(order: Order): string {
+    return accentColorForTabLetter(order.tabLetter ?? 'A');
+  }
+
+  bubbleAriaLabel(order: Order): string {
+    const label = this.bubbleLabel(order);
+    if (label) {
+      return label;
+    }
+    if (order.tabLetter) {
+      return `Tab ${order.tabLetter}`;
+    }
+    const count = this.getItemCount(order);
+    return count > 0 ? `Open order, ${count} items` : 'Open order';
   }
 
   private scrollBubbleIntoView(scrollEl: HTMLElement, bubble: HTMLElement): void {

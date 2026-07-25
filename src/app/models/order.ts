@@ -34,4 +34,9 @@ export interface Order {
    * TODO(firebase): Required for Security Rules and per-popup daily order numbers.
    */
   popupId?: string;
+  /**
+   * Local sticky tab letter for open drafts (A, B, C…).
+   * Assigned on create; reused when freed. Not synced to Firestore.
+   */
+  tabLetter?: string;
 }
