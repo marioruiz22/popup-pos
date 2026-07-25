@@ -16,9 +16,23 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Prevents double-tap zoom on iOS/iPadOS while still allowing pinch zoom. */
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  touch-action: manipulation;
+}
+
+button,
+a,
+input,
+label,
+[role='button'] {
+  touch-action: manipulation;
 }
 
 button,
