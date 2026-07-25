@@ -2,15 +2,15 @@
   <h2 class="switcher-heading">Draft Orders</h2>
 }
 
-@if (openOrders.length === 0) {
+@if (openOrders().length === 0) {
   <p class="switcher-empty">No draft orders</p>
 } @else {
   <div class="switcher-list">
-    @for (order of openOrders; track order.id) {
+    @for (order of openOrders(); track order.id) {
       <button
         type="button"
         class="switcher-item"
-        [class.active]="order.id === currentOrderId"
+        [class.active]="order.id === currentOrderId()"
         (click)="selectOrder(order.id)"
         [attr.aria-label]="orderAriaLabel(order)"
       >

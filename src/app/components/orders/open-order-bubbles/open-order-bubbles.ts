@@ -1,4 +1,12 @@
-import { AfterViewChecked, Component, ElementRef, output, viewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  output,
+  viewChild,
+} from '@angular/core';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
 import { accentColorForTabLetter } from '../../../utils/order-accent.util';
@@ -10,16 +18,20 @@ import { accentColorForTabLetter } from '../../../utils/order-accent.util';
   styleUrl: './open-order-bubbles.scss',
 })
 export class OpenOrderBubbles implements AfterViewChecked {
+  private readonly orderService = inject(OrderService);
+
   openCart = output<void>();
+
+  readonly openOrders = this.orderService.draftOrdersList;
+  readonly currentOrderId = this.orderService.activeDraftOrderId;
+  readonly hasOpenOrders = computed(() => this.openOrders().length > 0);
 
   private readonly bubblesScroll = viewChild<ElementRef<HTMLElement>>('bubblesScroll');
   private shouldScrollToActive = true;
   private lastOrderCount = 0;
 
-  constructor(private orderService: OrderService) {}
-
   ngAfterViewChecked(): void {
-    const orderCount = this.openOrders.length;
+    const orderCount = this.openOrders().length;
 
     if (orderCount !== this.lastOrderCount) {
       this.lastOrderCount = orderCount;
@@ -44,20 +56,8 @@ export class OpenOrderBubbles implements AfterViewChecked {
     this.shouldScrollToActive = false;
   }
 
-  get openOrders(): Order[] {
-    return this.orderService.getDraftOrders();
-  }
-
-  get currentOrderId(): string {
-    return this.orderService.getCurrentOrder()?.id ?? '';
-  }
-
-  get hasOpenOrders(): boolean {
-    return this.openOrders.length > 0;
-  }
-
   onOrderClick(id: string): void {
-    if (id === this.currentOrderId) {
+    if (id === this.currentOrderId()) {
       this.openCart.emit();
       return;
     }

@@ -1,4 +1,4 @@
-import { Component, DoCheck, input, output } from '@angular/core';
+import { Component, DoCheck, computed, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Order, PaymentMethod } from '../../../models/order';
 import { OrderItem } from '../../../models/order-item';
@@ -16,6 +16,9 @@ import { nameInitial } from '../../../utils/image.util';
   },
 })
 export class OrderEditor implements DoCheck {
+  private readonly orderService = inject(OrderService);
+  private readonly productService = inject(ProductService);
+
   readonly nameInitial = nameInitial;
 
   showHeading = input(true);
@@ -40,13 +43,21 @@ export class OrderEditor implements DoCheck {
 
   private trackedOrderId = '';
 
-  constructor(
-    private orderService: OrderService,
-    private productService: ProductService
-  ) {}
+  /** Keeps the editor in sync after async draft changes (e.g. complete on desktop). */
+  readonly order = computed(() => {
+    const id = this.orderId();
+    if (id) {
+      // Also depend on completed list so reopen/detail stays fresh.
+      this.orderService.completedOrdersList();
+      return this.orderService.getOrderById(id);
+    }
+    this.orderService.draftOrdersList();
+    this.orderService.activeDraftOrderId();
+    return this.orderService.getCurrentOrder();
+  });
 
   ngDoCheck(): void {
-    const order = this.order;
+    const order = this.order();
 
     if (!order) {
       this.trackedOrderId = '';
@@ -66,20 +77,12 @@ export class OrderEditor implements DoCheck {
     }
   }
 
-  get order(): Order | null {
-    const id = this.orderId();
-    if (id) {
-      return this.orderService.getOrderById(id);
-    }
-    return this.orderService.getCurrentOrder();
-  }
-
   get isEditable(): boolean {
-    return this.order?.status === 'draft';
+    return this.order()?.status === 'draft';
   }
 
   get orderHeading(): string {
-    const order = this.order;
+    const order = this.order();
     if (!order) {
       return '';
     }
@@ -90,23 +93,24 @@ export class OrderEditor implements DoCheck {
   }
 
   get itemCount(): number {
-    return this.order ? this.orderService.getItemCount(this.order) : 0;
+    const order = this.order();
+    return order ? this.orderService.getItemCount(order) : 0;
   }
 
   get subtotal(): number {
-    return this.orderService.getSubtotal(this.order ?? undefined);
+    return this.orderService.getSubtotal(this.order() ?? undefined);
   }
 
   get discount(): number {
-    return this.orderService.getDiscount(this.order ?? undefined);
+    return this.orderService.getDiscount(this.order() ?? undefined);
   }
 
   get tip(): number {
-    return this.orderService.getTip(this.order ?? undefined);
+    return this.orderService.getTip(this.order() ?? undefined);
   }
 
   get orderTotal(): number {
-    return this.orderService.getTotal(this.order ?? undefined);
+    return this.orderService.getTotal(this.order() ?? undefined);
   }
 
   get changeDue(): number {
@@ -141,7 +145,8 @@ export class OrderEditor implements DoCheck {
   }
 
   get canComplete(): boolean {
-    if (!this.order || this.order.items.length === 0) {
+    const order = this.order();
+    if (!order || order.items.length === 0) {
       return false;
     }
 
@@ -162,12 +167,12 @@ export class OrderEditor implements DoCheck {
 
   saveDiscount(): void {
     this.orderService.setDiscount(this.discountInput ?? 0);
-    this.discountInput = this.order?.discount ?? null;
+    this.discountInput = this.order()?.discount ?? null;
   }
 
   saveTip(): void {
     this.orderService.setTip(this.tipInput ?? 0);
-    this.tipInput = this.order?.tip ?? null;
+    this.tipInput = this.order()?.tip ?? null;
   }
 
   clearDiscount(): void {
@@ -245,7 +250,7 @@ export class OrderEditor implements DoCheck {
   }
 
   async deleteOrder(): Promise<void> {
-    const order = this.order;
+    const order = this.order();
     if (!order) {
       return;
     }
@@ -267,7 +272,7 @@ export class OrderEditor implements DoCheck {
   }
 
   getTotal(): number {
-    return this.orderService.getTotal(this.order ?? undefined);
+    return this.orderService.getTotal(this.order() ?? undefined);
   }
 
   private resetPayment(): void {

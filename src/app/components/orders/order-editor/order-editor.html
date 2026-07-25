@@ -2,7 +2,7 @@
   <h2>Current Order</h2>
 }
 
-@if (order) {
+@if (order(); as order) {
   <p class="order-meta">
     <span class="order-number">{{ orderHeading }}</span>
     <span class="status-chip">{{ order.status }}</span>

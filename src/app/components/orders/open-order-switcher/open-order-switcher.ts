@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { Order } from '../../../models/order';
 import { OrderService } from '../../../services/order.service';
 import { accentColorForTabLetter } from '../../../utils/order-accent.util';
@@ -10,17 +10,12 @@ import { accentColorForTabLetter } from '../../../utils/order-accent.util';
   styleUrl: './open-order-switcher.scss',
 })
 export class OpenOrderSwitcher {
+  private readonly orderService = inject(OrderService);
+
   showHeading = input(true);
 
-  constructor(private orderService: OrderService) {}
-
-  get openOrders(): Order[] {
-    return this.orderService.getDraftOrders();
-  }
-
-  get currentOrderId(): string {
-    return this.orderService.getCurrentOrder()?.id ?? '';
-  }
+  readonly openOrders = this.orderService.draftOrdersList;
+  readonly currentOrderId = this.orderService.activeDraftOrderId;
 
   selectOrder(id: string): void {
     this.orderService.selectOrder(id);

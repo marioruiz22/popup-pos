@@ -67,6 +67,12 @@ export class OrderService {
   /** In-progress orders. Local only — never synchronized. */
   private draftOrders: Order[] = [];
 
+  /**
+   * Bumped whenever drafts are persisted so zoneless views (desktop sidebar, etc.)
+   * refresh after async completes like Firestore setDoc.
+   */
+  private readonly draftsTick = signal(0);
+
   /** Completed orders for the current popup (Firestore-backed). */
   private readonly completedOrdersSignal = signal<Order[]>([]);
 
@@ -74,6 +80,16 @@ export class OrderService {
   private unsubscribeCompleted: Unsubscribe | null = null;
   private boundPopupId: string | null = null;
   private readonly completedSyncError = signal<string | null>(null);
+
+  readonly draftOrdersList = computed(() => {
+    this.draftsTick();
+    return this.draftOrders.filter((order) => order.status === 'draft');
+  });
+
+  readonly activeDraftOrderId = computed(() => {
+    this.draftsTick();
+    return this.currentOrderId;
+  });
 
   readonly completedOrdersList = computed(() =>
     this.completedOrdersSignal().filter((order) => order.status === 'completed')
@@ -96,7 +112,7 @@ export class OrderService {
   }
 
   getDraftOrders(): Order[] {
-    return this.draftOrders.filter((order) => order.status === 'draft');
+    return this.draftOrdersList();
   }
 
   /** @deprecated Use getDraftOrders(). */
@@ -809,5 +825,6 @@ export class OrderService {
       currentOrderId: this.currentOrderId,
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+    this.draftsTick.update((value) => value + 1);
   }
 }

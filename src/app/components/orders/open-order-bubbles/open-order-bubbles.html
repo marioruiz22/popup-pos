@@ -1,12 +1,12 @@
-@if (hasOpenOrders) {
+@if (hasOpenOrders()) {
   <div class="bubbles-bar">
     <div #bubblesScroll class="bubbles-scroll" aria-label="Open orders">
       <div class="bubbles-track">
-        @for (order of openOrders; track order.id) {
+        @for (order of openOrders(); track order.id) {
           <button
             type="button"
             class="order-bubble"
-            [class.active]="order.id === currentOrderId"
+            [class.active]="order.id === currentOrderId()"
             (click)="onOrderClick(order.id)"
             [attr.aria-label]="bubbleAriaLabel(order)"
           >
