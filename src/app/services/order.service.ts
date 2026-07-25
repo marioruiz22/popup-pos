@@ -14,11 +14,13 @@ import { FIRESTORE } from '../firebase/firebase.providers';
 import { PopupSessionService } from './popup-session.service';
 import { SettingsService } from './settings.service';
 
-/** @deprecated Migrated into draft storage key. */
-const LEGACY_STORAGE_KEY = 'popup-pos-orders';
-const DRAFT_STORAGE_KEY = 'popup-pos-draft-orders';
-/** @deprecated Completed orders now live in Firestore. */
-const COMPLETED_STORAGE_KEY = 'popup-pos-completed-orders';
+/** @deprecated Cleared on startup; completed orders live in Firestore. */
+const LEGACY_ORDERS_KEY = 'popup-pos-orders';
+const LEGACY_DRAFTS_KEY = 'popup-pos-draft-orders';
+const LEGACY_COMPLETED_KEY = 'popup-pos-completed-orders';
+
+/** Open orders keyed by popup id. */
+const DRAFTS_BY_POPUP_KEY = 'popup-pos-drafts-by-popup';
 
 interface DraftStore {
   orders: Order[];
@@ -79,6 +81,8 @@ export class OrderService {
   private currentOrderId = '';
   private unsubscribeCompleted: Unsubscribe | null = null;
   private boundPopupId: string | null = null;
+  /** Popup whose drafts are currently loaded into memory (`undefined` = not bound yet). */
+  private boundDraftPopupId: string | null | undefined = undefined;
   private readonly completedSyncError = signal<string | null>(null);
 
   readonly draftOrdersList = computed(() => {
@@ -98,11 +102,14 @@ export class OrderService {
   readonly lastCompletedSyncError = computed(() => this.completedSyncError());
 
   constructor() {
-    this.loadDrafts();
+    this.clearObsoleteLocalOrderKeys();
 
     effect(() => {
       const popupId = this.popupSessionService.currentPopupId();
-      untracked(() => this.bindCompletedOrders(popupId));
+      untracked(() => {
+        this.bindCompletedOrders(popupId);
+        this.bindDrafts(popupId);
+      });
     });
   }
 
@@ -675,20 +682,36 @@ export class OrderService {
     };
   }
 
-  private loadDrafts(): void {
-    this.migrateLegacyOrdersIfNeeded();
+  /**
+   * Swap in-memory drafts when the joined popup changes.
+   * Drafts for other popups stay in localStorage and are restored on rejoin.
+   */
+  private bindDrafts(popupId: string | null): void {
+    if (this.boundDraftPopupId === popupId) {
+      return;
+    }
 
-    const draftStore = this.readDraftStore();
-    this.draftOrders = draftStore.orders.map((order) => this.normalizeOrder(order));
+    if (typeof this.boundDraftPopupId === 'string') {
+      this.writeDraftsForPopup(this.boundDraftPopupId);
+    }
+
+    this.boundDraftPopupId = popupId;
+
+    if (!popupId) {
+      this.draftOrders = [];
+      this.currentOrderId = '';
+      this.draftsTick.update((value) => value + 1);
+      return;
+    }
+
+    const stored = this.readDraftsForPopup(popupId);
+    this.draftOrders = stored.orders.map((order) => this.normalizeOrder(order));
     this.ensureDraftTabLetters();
     this.currentOrderId =
-      this.draftOrders.find((order) => order.id === draftStore.currentOrderId && order.status === 'draft')
+      this.draftOrders.find((order) => order.id === stored.currentOrderId && order.status === 'draft')
         ?.id ?? '';
-
-    this.saveDrafts();
-
-    // Completed orders are loaded from Firestore for the active popup.
-    localStorage.removeItem(COMPLETED_STORAGE_KEY);
+    this.writeDraftsForPopup(popupId);
+    this.draftsTick.update((value) => value + 1);
   }
 
   private ensureDraftTabLetters(): void {
@@ -704,56 +727,11 @@ export class OrderService {
     }
   }
 
-  private migrateLegacyOrdersIfNeeded(): void {
-    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (!raw) {
-      return;
-    }
-
-    if (localStorage.getItem(DRAFT_STORAGE_KEY) || localStorage.getItem(COMPLETED_STORAGE_KEY)) {
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-      return;
-    }
-
-    try {
-      const data = JSON.parse(raw) as {
-        orders?: Array<Record<string, unknown>>;
-        currentOrderId?: string;
-      };
-
-      if (!Array.isArray(data.orders)) {
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-        return;
-      }
-
-      const drafts: Order[] = [];
-
-      for (const rawOrder of data.orders) {
-        const legacyStatus = String(rawOrder['status'] ?? '');
-        const order = this.normalizeOrder(rawOrder as unknown as Order);
-
-        if (legacyStatus === 'paid' || order.status === 'completed' || order.status === 'cancelled') {
-          // Completed legacy history is not auto-uploaded; start fresh in Firestore.
-          continue;
-        }
-
-        order.status = 'draft';
-        order.orderNumber = undefined;
-        order.completedAt = undefined;
-        drafts.push(order);
-      }
-
-      const currentOrderId =
-        drafts.find((order) => order.id === data.currentOrderId)?.id ?? drafts[0]?.id ?? '';
-
-      localStorage.setItem(
-        DRAFT_STORAGE_KEY,
-        JSON.stringify({ orders: drafts, currentOrderId } satisfies DraftStore)
-      );
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-    } catch {
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-    }
+  /** Drop pre-partition draft keys; no migration — start fresh per popup. */
+  private clearObsoleteLocalOrderKeys(): void {
+    localStorage.removeItem(LEGACY_ORDERS_KEY);
+    localStorage.removeItem(LEGACY_DRAFTS_KEY);
+    localStorage.removeItem(LEGACY_COMPLETED_KEY);
   }
 
   private normalizeOrder(order: Order & { paidAt?: Date | string }): Order {
@@ -774,7 +752,7 @@ export class OrderService {
       status = completedAt ? 'completed' : 'draft';
     }
 
-    const normalized: Order = {
+    return {
       id: order.id,
       orderNumber: typeof order.orderNumber === 'number' ? order.orderNumber : undefined,
       customerName: order.customerName,
@@ -794,37 +772,48 @@ export class OrderService {
           ? order.tabLetter.trim().toUpperCase()
           : undefined,
     };
-
-    if (normalized.status === 'draft' && !normalized.completedAt && legacyStatus === 'open') {
-      normalized.orderNumber = undefined;
-    }
-
-    return normalized;
   }
 
-  private readDraftStore(): DraftStore {
-    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+  private readAllDraftsByPopup(): Record<string, DraftStore> {
+    const raw = localStorage.getItem(DRAFTS_BY_POPUP_KEY);
     if (!raw) {
-      return { orders: [], currentOrderId: '' };
+      return {};
     }
 
     try {
-      const data = JSON.parse(raw) as DraftStore;
-      return {
-        orders: Array.isArray(data.orders) ? data.orders : [],
-        currentOrderId: data.currentOrderId ?? '',
-      };
+      const data = JSON.parse(raw) as Record<string, DraftStore>;
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
     } catch {
-      return { orders: [], currentOrderId: '' };
+      return {};
     }
   }
 
-  private saveDrafts(): void {
-    const data: DraftStore = {
+  private readDraftsForPopup(popupId: string): DraftStore {
+    const stored = this.readAllDraftsByPopup()[popupId];
+    return {
+      orders: Array.isArray(stored?.orders) ? stored.orders : [],
+      currentOrderId: stored?.currentOrderId ?? '',
+    };
+  }
+
+  private writeDraftsForPopup(popupId: string): void {
+    const all = this.readAllDraftsByPopup();
+    all[popupId] = {
       orders: this.draftOrders,
       currentOrderId: this.currentOrderId,
     };
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(DRAFTS_BY_POPUP_KEY, JSON.stringify(all));
+  }
+
+  private saveDrafts(): void {
+    const popupId =
+      (typeof this.boundDraftPopupId === 'string' ? this.boundDraftPopupId : null) ??
+      this.popupSessionService.getPopupId();
+
+    if (popupId) {
+      this.writeDraftsForPopup(popupId);
+    }
+
     this.draftsTick.update((value) => value + 1);
   }
 }
