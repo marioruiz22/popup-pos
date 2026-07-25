@@ -262,6 +262,10 @@
       </button>
     }
   </div>
+} @else if (hasOtherDraftOrders()) {
+  <p class="order-empty">
+    Order completed. Select another open order, or tap a product to start a new one.
+  </p>
 } @else {
   <p class="order-empty">No draft order. Tap a product to start a new order.</p>
 }

@@ -247,7 +247,7 @@ export class OrderService {
     order.tabLetter = undefined;
 
     this.moveDraftToCompletedLocal(order);
-    this.selectNextDraftOrder();
+    this.clearCurrentOrderSelection();
     this.saveDrafts();
     return true;
   }
@@ -563,6 +563,11 @@ export class OrderService {
   private selectNextDraftOrder(): void {
     const nextDraft = this.draftOrders.find((order) => order.status === 'draft');
     this.currentOrderId = nextDraft?.id ?? '';
+  }
+
+  /** After completing, leave no draft selected so the POS panel doesn't look unchanged. */
+  private clearCurrentOrderSelection(): void {
+    this.currentOrderId = '';
   }
 
   private findItem(productId: string) {

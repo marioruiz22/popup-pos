@@ -56,6 +56,8 @@ export class OrderEditor implements DoCheck {
     return this.orderService.getCurrentOrder();
   });
 
+  readonly hasOtherDraftOrders = computed(() => this.orderService.draftOrdersList().length > 0);
+
   ngDoCheck(): void {
     const order = this.order();
 
