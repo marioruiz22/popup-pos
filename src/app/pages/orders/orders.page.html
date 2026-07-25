@@ -43,10 +43,30 @@
     </button>
 
     @if (showItemBreakdown) {
+      <p class="breakdown-section-label">Payments</p>
+      <ul class="breakdown-list payment-breakdown" aria-label="Payment summary">
+        <li class="breakdown-row">
+          <span class="breakdown-name">Cash</span>
+          <span class="breakdown-qty">{{ cashOrderCount() }} orders</span>
+          <span class="breakdown-total">${{ totalCash().toFixed(2) }}</span>
+        </li>
+        <li class="breakdown-row">
+          <span class="breakdown-name">Mobile</span>
+          <span class="breakdown-qty">{{ mobileOrderCount() }} orders</span>
+          <span class="breakdown-total">${{ totalMobile().toFixed(2) }}</span>
+        </li>
+        <li class="breakdown-row">
+          <span class="breakdown-name">Sales (ex. tips)</span>
+          <span class="breakdown-qty" aria-hidden="true"></span>
+          <span class="breakdown-total">${{ salesExcludingTips().toFixed(2) }}</span>
+        </li>
+      </ul>
+
       @if (itemBreakdown().length === 0) {
         <p class="section-empty">No items sold in this range</p>
       } @else {
-        <ul class="breakdown-list">
+        <p class="breakdown-section-label">Items</p>
+        <ul class="breakdown-list" aria-label="Item breakdown">
           @for (item of itemBreakdown(); track item.name) {
             <li class="breakdown-row">
               <span class="breakdown-name">{{ item.name }}</span>

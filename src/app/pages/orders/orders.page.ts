@@ -48,6 +48,34 @@ export class OrdersPage {
     this.filteredOrders().reduce((total, order) => total + (order.tip ?? 0), 0)
   );
 
+  /** Product sales after discounts, excluding tips. */
+  readonly salesExcludingTips = computed(() =>
+    this.filteredOrders().reduce((total, order) => {
+      const tip = order.tip ?? 0;
+      return total + Number((this.getTotal(order) - tip).toFixed(2));
+    }, 0)
+  );
+
+  readonly totalCash = computed(() =>
+    this.filteredOrders()
+      .filter((order) => order.paymentMethod === 'cash')
+      .reduce((total, order) => total + this.getTotal(order), 0)
+  );
+
+  readonly cashOrderCount = computed(
+    () => this.filteredOrders().filter((order) => order.paymentMethod === 'cash').length
+  );
+
+  readonly totalMobile = computed(() =>
+    this.filteredOrders()
+      .filter((order) => order.paymentMethod === 'mobile')
+      .reduce((total, order) => total + this.getTotal(order), 0)
+  );
+
+  readonly mobileOrderCount = computed(
+    () => this.filteredOrders().filter((order) => order.paymentMethod === 'mobile').length
+  );
+
   readonly itemBreakdown = computed(() => {
     const totals = new Map<string, { name: string; quantity: number; total: number }>();
 
