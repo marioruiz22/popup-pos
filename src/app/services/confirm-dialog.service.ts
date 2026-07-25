@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { OverlayHistoryBridge } from '../utils/overlay-history.util';
 
 export interface ConfirmDialogOptions {
   title: string;
@@ -18,13 +19,16 @@ interface ConfirmDialogState extends ConfirmDialogOptions {
 })
 export class ConfirmDialogService {
   private readonly state = signal<ConfirmDialogState | null>(null);
+  private readonly history = new OverlayHistoryBridge('popupPosConfirm');
 
   readonly isOpen = computed(() => this.state() !== null);
   readonly active = computed(() => this.state());
 
   confirm(options: ConfirmDialogOptions): Promise<boolean> {
     // Replace any existing dialog so we never leave a dangling promise.
-    this.state()?.resolve(false);
+    if (this.state()) {
+      this.respond(false);
+    }
 
     return new Promise<boolean>((resolve) => {
       this.state.set({
@@ -35,9 +39,19 @@ export class ConfirmDialogService {
         danger: options.danger ?? false,
         resolve,
       });
+      this.history.push();
     });
   }
 
+  consumeIgnoredPopstate(): boolean {
+    return this.history.consumeIgnoredPopstate();
+  }
+
+  matchesHistory(): boolean {
+    return this.history.matchesState();
+  }
+
+  /** Close from Cancel / backdrop / confirm button. */
   respond(confirmed: boolean): void {
     const current = this.state();
     if (!current) {
@@ -45,6 +59,19 @@ export class ConfirmDialogService {
     }
 
     this.state.set(null);
+    this.history.closeFromUi();
     current.resolve(confirmed);
+  }
+
+  /** Close from browser/system Back — history already moved. */
+  respondFromPopstate(): void {
+    const current = this.state();
+    if (!current) {
+      return;
+    }
+
+    this.state.set(null);
+    this.history.closeFromPopstate();
+    current.resolve(false);
   }
 }

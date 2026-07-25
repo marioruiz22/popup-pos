@@ -54,7 +54,7 @@
   </section>
 </div>
 
-@if (editorOpen) {
+@if (editorOpen()) {
   <app-product-editor-panel
     [productId]="editingProductId"
     (closed)="closeEditor()"

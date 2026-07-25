@@ -146,6 +146,6 @@
   </section>
 </div>
 
-@if (detailOrderId) {
-  <app-order-detail-panel [orderId]="detailOrderId" (closed)="closeDetails()" />
+@if (detailOrderId(); as orderId) {
+  <app-order-detail-panel [orderId]="orderId" (closed)="closeDetails()" />
 }

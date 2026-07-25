@@ -1,7 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Order } from '../../models/order';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { OrderService } from '../../services/order.service';
 import { OrderDetailPanel } from '../../components/orders/order-detail-panel/order-detail-panel';
+import { OverlayHistoryBridge } from '../../utils/overlay-history.util';
 
 export type OrdersRange = 'today' | 'week' | 'year' | 'all';
 
@@ -11,12 +13,15 @@ export type OrdersRange = 'today' | 'week' | 'year' | 'all';
   templateUrl: './orders.page.html',
   styleUrl: './orders.page.scss',
 })
-export class OrdersPage {
+export class OrdersPage implements OnDestroy {
   private readonly orderService = inject(OrderService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly detailHistory = new OverlayHistoryBridge('popupPosOrderDetail');
 
   private readonly rangeSignal = signal<OrdersRange>('today');
+  private lastDetailOrderId: string | null = null;
   showItemBreakdown = false;
-  detailOrderId: string | null = null;
+  readonly detailOrderId = signal<string | null>(null);
 
   readonly ranges: { id: OrdersRange; label: string }[] = [
     { id: 'today', label: 'Today' },
@@ -110,12 +115,52 @@ export class OrdersPage {
     this.showItemBreakdown = !this.showItemBreakdown;
   }
 
+  ngOnDestroy(): void {
+    this.detailHistory.clearOnDestroy();
+  }
+
+  @HostListener('window:popstate')
+  onBrowserBack(): void {
+    if (this.confirmDialog.isOpen() || this.confirmDialog.matchesHistory()) {
+      return;
+    }
+    if (this.detailHistory.consumeIgnoredPopstate()) {
+      return;
+    }
+
+    if (this.detailOrderId()) {
+      if (this.detailHistory.matchesState()) {
+        this.detailHistory.adoptCurrentState();
+        return;
+      }
+      this.detailHistory.closeFromPopstate();
+      this.detailOrderId.set(null);
+      return;
+    }
+
+    // Forward onto an order-detail history entry — reopen if we still know which.
+    if (this.detailHistory.matchesState()) {
+      if (this.lastDetailOrderId) {
+        this.detailOrderId.set(this.lastDetailOrderId);
+        this.detailHistory.adoptCurrentState();
+      } else {
+        history.back();
+      }
+    }
+  }
+
   openDetails(orderId: string): void {
-    this.detailOrderId = orderId;
+    this.lastDetailOrderId = orderId;
+    this.detailOrderId.set(orderId);
+    this.detailHistory.push();
   }
 
   closeDetails(): void {
-    this.detailOrderId = null;
+    if (!this.detailOrderId()) {
+      return;
+    }
+    this.detailOrderId.set(null);
+    this.detailHistory.closeFromUi();
   }
 
   getItemCount(order: Order): number {
