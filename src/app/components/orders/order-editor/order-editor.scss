@@ -49,8 +49,8 @@
   margin: 0 0 1rem;
 }
 
-.order-number {
-  font-size: 1.35rem;
+.order-subtitle {
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -533,8 +533,8 @@
   font-size: 1.05rem;
 }
 
-:host(.touch-friendly) .order-number {
-  font-size: 1.5rem;
+:host(.touch-friendly) .order-subtitle {
+  font-size: 1.15rem;
 }
 
 :host(.touch-friendly) .status-chip {

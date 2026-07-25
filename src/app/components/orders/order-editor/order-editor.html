@@ -1,7 +1,7 @@
 @if (showHeading() || showDeleteButton()) {
   <header class="order-header">
     @if (showHeading()) {
-      <h2 class="order-title">Current Order</h2>
+      <h2 class="order-title">Checkout</h2>
     } @else {
       <span class="order-title-spacer"></span>
     }
@@ -33,8 +33,10 @@
 
 @if (order(); as order) {
   <p class="order-meta">
-    <span class="order-number">{{ orderHeading }}</span>
-    <span class="status-chip">{{ order.status }}</span>
+    <span class="order-subtitle">{{ orderHeading }}</span>
+    @if (order.status !== 'draft') {
+      <span class="status-chip">{{ statusLabel(order.status) }}</span>
+    }
     @if (order.paymentMethod) {
       <span class="status-chip">{{ order.paymentMethod }}</span>
     }
@@ -290,5 +292,5 @@
     Select another open order, or tap a product to start a new one.
   </p>
 } @else {
-  <p class="order-empty">No draft order. Tap a product to start a new order.</p>
+  <p class="order-empty">No open order. Tap a product to start a new order.</p>
 }

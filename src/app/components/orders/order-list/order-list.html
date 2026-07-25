@@ -5,7 +5,7 @@
         @if (order.orderNumber != null) {
           Order #{{ order.orderNumber }}
         } @else {
-          Draft
+          Open
         }
         ({{ order.items.length }} items)
       </button>

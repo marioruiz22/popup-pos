@@ -41,7 +41,7 @@ export class OrderCartPanel implements OnInit, OnDestroy {
     }
 
     const label =
-      order.orderNumber != null ? `order #${order.orderNumber}` : 'this draft order';
+      order.orderNumber != null ? `order #${order.orderNumber}` : 'this open order';
     const confirmed = await this.confirmDialog.confirm({
       title: 'Delete order',
       message: `Delete ${label}? This cannot be undone.`,

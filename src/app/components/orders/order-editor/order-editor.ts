@@ -6,6 +6,7 @@ import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { OrderService } from '../../../services/order.service';
 import { ProductService } from '../../../services/product.service';
 import { nameInitial } from '../../../utils/image.util';
+import { orderStatusLabel } from '../../../utils/order-status.util';
 
 @Component({
   selector: 'app-order-editor',
@@ -22,6 +23,7 @@ export class OrderEditor implements DoCheck {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly nameInitial = nameInitial;
+  readonly statusLabel = orderStatusLabel;
 
   showHeading = input(true);
   showCompleteButton = input(true);
@@ -93,7 +95,7 @@ export class OrderEditor implements DoCheck {
     if (order.orderNumber != null) {
       return `Order #${order.orderNumber}`;
     }
-    return 'Draft order';
+    return 'New order';
   }
 
   get itemCount(): number {
@@ -260,7 +262,7 @@ export class OrderEditor implements DoCheck {
     }
 
     const label =
-      order.orderNumber != null ? `order #${order.orderNumber}` : 'this draft order';
+      order.orderNumber != null ? `order #${order.orderNumber}` : 'this open order';
     const confirmed = await this.confirmDialog.confirm({
       title: 'Delete order',
       message: `Delete ${label}? This cannot be undone.`,

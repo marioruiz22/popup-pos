@@ -111,7 +111,7 @@
                 @if (order.orderNumber != null) {
                   #{{ order.orderNumber }}
                 } @else {
-                  Draft
+                  Open
                 }
                 @if (order.customerName) {
                   <span class="order-customer-inline">· {{ order.customerName }}</span>
