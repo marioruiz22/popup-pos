@@ -24,7 +24,7 @@
 
   <app-open-order-bubbles (openCart)="openCart()" />
 
-  @if (cartOpen) {
+  @if (cartOpen()) {
     <app-order-cart-panel (closed)="closeCart()" />
   }
 </div>
