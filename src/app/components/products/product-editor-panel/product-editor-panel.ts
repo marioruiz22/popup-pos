@@ -17,7 +17,12 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
 
   imageError = '';
   imageProcessing = false;
-  form: ProductInput = this.createEmptyForm();
+  form: {
+    name: string;
+    price: number | null;
+    imageUrl: string;
+    active: boolean;
+  } = this.createEmptyForm();
 
   constructor(
     private productService: ProductService,
@@ -49,6 +54,16 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
     return nameInitial(this.form.name);
   }
 
+  get canSave(): boolean {
+    if (this.imageProcessing) {
+      return false;
+    }
+
+    const name = this.form.name.trim();
+    const price = this.form.price;
+    return Boolean(name) && price != null && !Number.isNaN(price) && price >= 0;
+  }
+
   close(): void {
     this.closed.emit();
   }
@@ -76,14 +91,21 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
   }
 
   async submit(): Promise<void> {
-    if (this.imageProcessing) {
+    if (!this.canSave) {
       return;
     }
 
+    const input: ProductInput = {
+      name: this.form.name,
+      price: this.form.price!,
+      imageUrl: this.form.imageUrl,
+      active: this.form.active,
+    };
+
     const productId = this.productId();
     const result = productId
-      ? await this.productService.updateProduct(productId, this.form)
-      : await this.productService.addProduct(this.form);
+      ? await this.productService.updateProduct(productId, input)
+      : await this.productService.addProduct(input);
 
     if (result) {
       this.saved.emit();
@@ -125,6 +147,13 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
     this.imageError = '';
   }
 
+  clearPrice(): void {
+    this.form = {
+      ...this.form,
+      price: null,
+    };
+  }
+
   private loadProduct(): void {
     const productId = this.productId();
     if (!productId) {
@@ -146,10 +175,10 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
     };
   }
 
-  private createEmptyForm(): ProductInput {
+  private createEmptyForm() {
     return {
       name: '',
-      price: 0,
+      price: null as number | null,
       imageUrl: '',
       active: true,
     };

@@ -137,6 +137,29 @@
   font: inherit;
 }
 
+.money-clear {
+  width: 1.85rem;
+  height: 1.85rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.money-clear:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.money-clear:not(:disabled):hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.75);
+}
+
 .image-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

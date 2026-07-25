@@ -50,6 +50,15 @@
                 required
                 placeholder="0.00"
               />
+              <button
+                type="button"
+                class="money-clear"
+                (click)="clearPrice()"
+                [disabled]="form.price == null"
+                aria-label="Clear price"
+              >
+                ×
+              </button>
             </div>
           </label>
         </section>
@@ -106,7 +115,7 @@
           </label>
         </section>
 
-        <button type="submit" class="save-button" [disabled]="imageProcessing">
+        <button type="submit" class="save-button" [disabled]="!canSave">
           {{ isEditing ? 'Save Changes' : 'Add Product' }}
         </button>
       </form>
