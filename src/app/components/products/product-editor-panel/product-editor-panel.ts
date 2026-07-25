@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, input, output } from '
 import { FormsModule } from '@angular/forms';
 import { ProductInput, ProductService } from '../../../services/product.service';
 import { fileToProductImageDataUrl, nameInitial } from '../../../utils/image.util';
+import { isDesktopViewport } from '../../../utils/viewport.util';
 
 @Component({
   selector: 'app-product-editor-panel',
@@ -66,6 +67,12 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
 
   close(): void {
     this.closed.emit();
+  }
+
+  onBackdropClick(): void {
+    if (isDesktopViewport()) {
+      this.close();
+    }
   }
 
   async deleteProduct(): Promise<void> {

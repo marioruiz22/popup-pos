@@ -1,9 +1,10 @@
-<div class="cart-backdrop">
+<div class="cart-backdrop" (click)="onBackdropClick()">
   <section
     class="cart-panel"
     role="dialog"
     aria-modal="true"
     aria-label="Checkout"
+    (click)="$event.stopPropagation()"
   >
     <header class="cart-header">
       <button type="button" class="cart-close" (click)="close()" aria-label="Close checkout">×</button>

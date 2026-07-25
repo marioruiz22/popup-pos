@@ -1,5 +1,11 @@
-<div class="editor-backdrop">
-  <section class="editor-panel" role="dialog" aria-modal="true" [attr.aria-label]="title">
+<div class="editor-backdrop" (click)="onBackdropClick()">
+  <section
+    class="editor-panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title"
+    (click)="$event.stopPropagation()"
+  >
     <header class="editor-header">
       <button type="button" class="editor-close" (click)="close()" aria-label="Close">×</button>
       <h2 class="editor-title">{{ title }}</h2>

@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, input, output } from '@angular/core';
 import { OrderEditor } from '../order-editor/order-editor';
 import { OrderService } from '../../../services/order.service';
+import { isDesktopViewport } from '../../../utils/viewport.util';
 
 @Component({
   selector: 'app-order-detail-panel',
@@ -28,6 +29,12 @@ export class OrderDetailPanel implements OnInit, OnDestroy {
 
   close(): void {
     this.closed.emit();
+  }
+
+  onBackdropClick(): void {
+    if (isDesktopViewport()) {
+      this.close();
+    }
   }
 
   async deleteOrder(): Promise<void> {
