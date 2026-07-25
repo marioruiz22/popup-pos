@@ -328,7 +328,7 @@ export class OrderService {
       this.draftOrders.splice(draftIndex, 1);
 
       if (this.currentOrderId === id) {
-        this.selectNextDraftOrder();
+        this.clearCurrentOrderSelection();
       }
 
       this.saveDrafts();
@@ -560,12 +560,7 @@ export class OrderService {
     });
   }
 
-  private selectNextDraftOrder(): void {
-    const nextDraft = this.draftOrders.find((order) => order.status === 'draft');
-    this.currentOrderId = nextDraft?.id ?? '';
-  }
-
-  /** After completing, leave no draft selected so the POS panel doesn't look unchanged. */
+  /** After completing or deleting the active draft, leave no draft selected. */
   private clearCurrentOrderSelection(): void {
     this.currentOrderId = '';
   }
