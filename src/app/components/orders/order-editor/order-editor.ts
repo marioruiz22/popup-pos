@@ -94,19 +94,19 @@ export class OrderEditor implements DoCheck {
   }
 
   get subtotal(): number {
-    return this.orderService.getSubtotal();
+    return this.orderService.getSubtotal(this.order ?? undefined);
   }
 
   get discount(): number {
-    return this.orderService.getDiscount();
+    return this.orderService.getDiscount(this.order ?? undefined);
   }
 
   get tip(): number {
-    return this.orderService.getTip();
+    return this.orderService.getTip(this.order ?? undefined);
   }
 
   get orderTotal(): number {
-    return this.orderService.getTotal();
+    return this.orderService.getTotal(this.order ?? undefined);
   }
 
   get changeDue(): number {
@@ -267,7 +267,7 @@ export class OrderEditor implements DoCheck {
   }
 
   getTotal(): number {
-    return this.orderService.getTotal();
+    return this.orderService.getTotal(this.order ?? undefined);
   }
 
   private resetPayment(): void {
