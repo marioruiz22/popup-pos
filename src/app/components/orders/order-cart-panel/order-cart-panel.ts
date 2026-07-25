@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, output } from '@angular/core';
 import { OrderEditor } from '../order-editor/order-editor';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { OrderService } from '../../../services/order.service';
 import { isDesktopViewport } from '../../../utils/viewport.util';
 
@@ -10,9 +11,10 @@ import { isDesktopViewport } from '../../../utils/viewport.util';
   styleUrl: './order-cart-panel.scss',
 })
 export class OrderCartPanel implements OnInit, OnDestroy {
-  closed = output<void>();
+  private readonly orderService = inject(OrderService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
-  constructor(private orderService: OrderService) {}
+  closed = output<void>();
 
   ngOnInit(): void {
     document.body.classList.add('checkout-open');
@@ -40,7 +42,12 @@ export class OrderCartPanel implements OnInit, OnDestroy {
 
     const label =
       order.orderNumber != null ? `order #${order.orderNumber}` : 'this draft order';
-    const confirmed = confirm(`Delete ${label}? This cannot be undone.`);
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete order',
+      message: `Delete ${label}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }

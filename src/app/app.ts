@@ -1,12 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AppNav } from './components/layout/app-nav/app-nav';
+import { ConfirmDialog } from './components/ui/confirm-dialog/confirm-dialog';
 import { PopupSessionService } from './services/popup-session.service';
 import { SettingsService } from './services/settings.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, AppNav],
+  imports: [RouterOutlet, RouterLink, AppNav, ConfirmDialog],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

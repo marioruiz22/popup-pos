@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PopupSessionService } from '../../services/popup-session.service';
 import { SettingsService } from '../../services/settings.service';
 
@@ -13,6 +14,7 @@ import { SettingsService } from '../../services/settings.service';
 export class SettingsPage {
   private readonly settingsService = inject(SettingsService);
   private readonly popupSession = inject(PopupSessionService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly router = inject(Router);
 
   popupName = '';
@@ -46,10 +48,14 @@ export class SettingsPage {
     this.savedMessage = 'Settings saved';
   }
 
-  leavePopup(): void {
-    const confirmed = confirm(
-      'Leave this popup on this device? You will need the join code to unlock the app again.'
-    );
+  async leavePopup(): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Leave popup',
+      message:
+        'Leave this popup on this device? You will need the join code to unlock the app again.',
+      confirmLabel: 'Leave',
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }

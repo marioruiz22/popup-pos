@@ -1,0 +1,30 @@
+@if (dialog.active(); as active) {
+  <div class="confirm-backdrop" (click)="onBackdropClick()" role="presentation">
+    <section
+      class="confirm-panel"
+      role="alertdialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'confirm-title'"
+      [attr.aria-describedby]="'confirm-message'"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="confirm-title" class="confirm-title">{{ active.title }}</h2>
+      <p id="confirm-message" class="confirm-message">{{ active.message }}</p>
+
+      <div class="confirm-actions">
+        <button type="button" class="confirm-button cancel" (click)="cancel()">
+          {{ active.cancelLabel }}
+        </button>
+        <button
+          type="button"
+          class="confirm-button"
+          [class.danger]="active.danger"
+          [class.primary]="!active.danger"
+          (click)="confirm()"
+        >
+          {{ active.confirmLabel }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

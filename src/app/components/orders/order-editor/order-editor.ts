@@ -2,6 +2,7 @@ import { Component, DoCheck, computed, inject, input, output } from '@angular/co
 import { FormsModule } from '@angular/forms';
 import { Order, PaymentMethod } from '../../../models/order';
 import { OrderItem } from '../../../models/order-item';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { OrderService } from '../../../services/order.service';
 import { ProductService } from '../../../services/product.service';
 import { nameInitial } from '../../../utils/image.util';
@@ -18,6 +19,7 @@ import { nameInitial } from '../../../utils/image.util';
 export class OrderEditor implements DoCheck {
   private readonly orderService = inject(OrderService);
   private readonly productService = inject(ProductService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly nameInitial = nameInitial;
 
@@ -259,7 +261,12 @@ export class OrderEditor implements DoCheck {
 
     const label =
       order.orderNumber != null ? `order #${order.orderNumber}` : 'this draft order';
-    const confirmed = confirm(`Delete ${label}? This cannot be undone.`);
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete order',
+      message: `Delete ${label}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }

@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, input, output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { ProductInput, ProductService } from '../../../services/product.service';
 import { fileToProductImageDataUrl, nameInitial } from '../../../utils/image.util';
 import { isDesktopViewport } from '../../../utils/viewport.util';
@@ -11,6 +12,10 @@ import { isDesktopViewport } from '../../../utils/viewport.util';
   styleUrl: './product-editor-panel.scss',
 })
 export class ProductEditorPanel implements OnInit, OnDestroy {
+  private readonly productService = inject(ProductService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+
   productId = input<string | null>(null);
   closed = output<void>();
   saved = output<void>();
@@ -24,11 +29,6 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
     imageUrl: string;
     active: boolean;
   } = this.createEmptyForm();
-
-  constructor(
-    private productService: ProductService,
-    private changeDetector: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     document.body.classList.add('checkout-open');
@@ -86,7 +86,12 @@ export class ProductEditorPanel implements OnInit, OnDestroy {
       return;
     }
 
-    const confirmed = confirm(`Delete "${product.name}"? This cannot be undone.`);
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete product',
+      message: `Delete "${product.name}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }
