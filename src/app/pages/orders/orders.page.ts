@@ -5,7 +5,7 @@ import { OrderService } from '../../services/order.service';
 import { OrderDetailPanel } from '../../components/orders/order-detail-panel/order-detail-panel';
 import { OverlayHistoryBridge } from '../../utils/overlay-history.util';
 
-export type OrdersRange = 'today' | 'week' | 'year' | 'all';
+export type OrdersRange = 'today' | 'week' | 'year' | 'all' | 'date';
 
 @Component({
   selector: 'app-orders-page',
@@ -19,6 +19,7 @@ export class OrdersPage implements OnDestroy {
   private readonly detailHistory = new OverlayHistoryBridge('popupPosOrderDetail');
 
   private readonly rangeSignal = signal<OrdersRange>('today');
+  readonly selectedDate = signal<string>('');
   private lastDetailOrderId: string | null = null;
   showItemBreakdown = false;
   readonly detailOrderId = signal<string | null>(null);
@@ -28,6 +29,7 @@ export class OrdersPage implements OnDestroy {
     { id: 'week', label: 'This week' },
     { id: 'year', label: 'This year' },
     { id: 'all', label: 'All time' },
+    { id: 'date', label: 'Date' },
   ];
 
   readonly loadError = this.orderService.lastCompletedSyncError;
@@ -108,7 +110,27 @@ export class OrdersPage implements OnDestroy {
   }
 
   setRange(range: OrdersRange): void {
+    if (range === 'date') {
+      this.setDateMode();
+      return;
+    }
     this.rangeSignal.set(range);
+  }
+
+  setDateMode(): void {
+    // Default to today when switching to "specific date".
+    const now = new Date();
+    this.selectedDate.set(this.toDateInputValue(now));
+    this.rangeSignal.set('date');
+  }
+
+  onDateChange(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) {
+      return;
+    }
+    this.selectedDate.set(input.value);
+    this.rangeSignal.set('date');
   }
 
   toggleItemBreakdown(): void {
@@ -214,6 +236,15 @@ export class OrdersPage implements OnDestroy {
       return date >= this.startOfWeek(now);
     }
 
+    if (range === 'date') {
+      if (!this.selectedDate()) {
+        return false;
+      }
+      const start = this.startOfDayFromDateInput(this.selectedDate());
+      const end = this.addDays(start, 1);
+      return date >= start && date < end;
+    }
+
     return date.getFullYear() === now.getFullYear();
   }
 
@@ -232,5 +263,24 @@ export class OrdersPage implements OnDestroy {
     const day = start.getDay();
     start.setDate(start.getDate() - day);
     return start;
+  }
+
+  private startOfDayFromDateInput(value: string): Date {
+    // value is expected in local format YYYY-MM-DD from <input type="date">.
+    const [year, month, day] = value.split('-').map((v) => Number(v));
+    return this.startOfDay(new Date(year, month - 1, day));
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const next = new Date(date);
+    next.setDate(next.getDate() + days);
+    return next;
+  }
+
+  private toDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

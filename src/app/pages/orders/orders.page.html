@@ -18,6 +18,19 @@
     }
   </div>
 
+  @if (range === 'date') {
+    <div class="date-filter" aria-label="Specific date">
+      <label class="date-label" for="sales-date">Select date</label>
+      <input
+        id="sales-date"
+        type="date"
+        class="date-input"
+        [value]="selectedDate()"
+        (change)="onDateChange($event)"
+      />
+    </div>
+  }
+
   <section class="summary-card" aria-label="Sales summary">
     <div class="summary-grid">
       <div class="summary-stat">
