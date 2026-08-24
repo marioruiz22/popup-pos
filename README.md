@@ -2,6 +2,22 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.19.
 
+## Quick start (run the app)
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the dev server:
+
+```bash
+ng serve
+```
+
+3. Open `http://localhost:4200/`.
+
 ## Development server
 
 To start a local development server, run:
