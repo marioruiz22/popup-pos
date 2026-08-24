@@ -1,7 +1,8 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { KNOWN_POPUPS } from '../data/known-popups';
 import { PopupDefinition } from '../models/popup';
 import { PopupSession } from '../models/popup-session';
+import { AuthService } from './auth.service';
 
 const STORAGE_KEY = 'popup-pos-popup-session';
 
@@ -15,6 +16,7 @@ const STORAGE_KEY = 'popup-pos-popup-session';
   providedIn: 'root',
 })
 export class PopupSessionService {
+  private readonly authService = inject(AuthService);
   private readonly session = signal<PopupSession | null>(null);
 
   readonly isJoined = computed(() => this.session() !== null);
@@ -23,7 +25,7 @@ export class PopupSessionService {
   readonly currentPopupName = computed(() => this.session()?.popupName ?? null);
 
   constructor() {
-    this.load();
+    void this.restoreSession();
   }
 
   /** Primary id for future paths: popups/{popupId}/products, popups/{popupId}/orders */
@@ -61,6 +63,16 @@ export class PopupSessionService {
       return { ok: false, error: 'Invalid join code. Check the code and try again.' };
     }
 
+    try {
+      await this.authService.ensureSignedIn();
+    } catch (error) {
+      console.error('Firebase Auth sign-in failed', error);
+      return {
+        ok: false,
+        error: 'Could not connect securely. Check your connection and try again.',
+      };
+    }
+
     const next: PopupSession = {
       popupId: popup.id,
       joinCode: this.normalizeJoinCode(popup.joinCode),
@@ -75,11 +87,11 @@ export class PopupSessionService {
 
   /**
    * Clears the local popup session (return to join screen).
-   * TODO(firebase): Also Firebase Auth signOut().
    */
   leavePopup(): void {
     this.session.set(null);
     localStorage.removeItem(STORAGE_KEY);
+    void this.authService.signOut();
   }
 
   normalizeJoinCode(rawCode: string): string {
@@ -97,7 +109,7 @@ export class PopupSessionService {
     );
   }
 
-  private load(): void {
+  private async restoreSession(): Promise<void> {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return;
@@ -113,6 +125,14 @@ export class PopupSessionService {
       // Re-validate against the current registry so removed codes cannot stay unlocked.
       const popup = this.findPopupByJoinCode(data.joinCode);
       if (!popup || popup.id !== data.popupId) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+
+      try {
+        await this.authService.ensureSignedIn();
+      } catch (error) {
+        console.error('Firebase Auth restore failed', error);
         localStorage.removeItem(STORAGE_KEY);
         return;
       }

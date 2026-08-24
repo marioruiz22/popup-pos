@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny. Clients must be signed in (anonymous auth today;
+    // later: custom tokens with a popupId claim for tighter scoping).
+
+    match /popups/{popupId}/products/{productId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /popups/{popupId}/orders/{orderId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
