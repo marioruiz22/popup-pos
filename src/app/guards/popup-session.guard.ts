@@ -3,9 +3,11 @@ import { CanActivateFn, Router } from '@angular/router';
 import { PopupSessionService } from '../services/popup-session.service';
 
 /** Requires an active popup session (join code). */
-export const popupJoinedGuard: CanActivateFn = () => {
+export const popupJoinedGuard: CanActivateFn = async () => {
   const session = inject(PopupSessionService);
   const router = inject(Router);
+
+  await session.whenReady();
 
   if (session.isJoined()) {
     return true;
@@ -15,9 +17,11 @@ export const popupJoinedGuard: CanActivateFn = () => {
 };
 
 /** Sends already-joined users away from the join screen. */
-export const popupJoinPageGuard: CanActivateFn = () => {
+export const popupJoinPageGuard: CanActivateFn = async () => {
   const session = inject(PopupSessionService);
   const router = inject(Router);
+
+  await session.whenReady();
 
   if (!session.isJoined()) {
     return true;

@@ -24,8 +24,16 @@ export class PopupSessionService {
   readonly currentPopupId = computed(() => this.session()?.popupId ?? null);
   readonly currentPopupName = computed(() => this.session()?.popupName ?? null);
 
+  private readonly ready: Promise<void>;
+
   constructor() {
-    void this.restoreSession();
+    this.hydrateFromStorage();
+    this.ready = this.ensureAuthAfterHydrate();
+  }
+
+  /** Resolves after local session restore and Firebase Auth are ready. */
+  whenReady(): Promise<void> {
+    return this.ready;
   }
 
   /** Primary id for future paths: popups/{popupId}/products, popups/{popupId}/orders */
@@ -109,7 +117,8 @@ export class PopupSessionService {
     );
   }
 
-  private async restoreSession(): Promise<void> {
+  /** Restore a saved join immediately so reload doesn't flash the join screen. */
+  private hydrateFromStorage(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return;
@@ -129,14 +138,6 @@ export class PopupSessionService {
         return;
       }
 
-      try {
-        await this.authService.ensureSignedIn();
-      } catch (error) {
-        console.error('Firebase Auth restore failed', error);
-        localStorage.removeItem(STORAGE_KEY);
-        return;
-      }
-
       this.session.set({
         popupId: popup.id,
         joinCode: this.normalizeJoinCode(popup.joinCode),
@@ -145,6 +146,19 @@ export class PopupSessionService {
       });
     } catch {
       localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  private async ensureAuthAfterHydrate(): Promise<void> {
+    if (!this.session()) {
+      return;
+    }
+
+    try {
+      await this.authService.ensureSignedIn();
+    } catch (error) {
+      console.error('Firebase Auth restore failed', error);
+      this.leavePopup();
     }
   }
 
